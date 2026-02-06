@@ -88,13 +88,25 @@ public class HomeFragment extends Fragment implements ReminderAdapter.OnItemClic
 
     @Override
     public void onDeleteClick(Reminder reminder) {
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext(),
-                R.style.ThemeOverlay_App_MaterialAlertDialog_Destructive)
-                .setTitle("Delete Reminder")
-                .setMessage("Are you sure you want to delete this reminder?")
-                .setPositiveButton("Delete", (dialog, which) -> viewModel.delete(reminder))
-                .setNegativeButton("Cancel", null)
-                .show();
+        android.view.LayoutInflater inflater = getLayoutInflater();
+        android.view.View dialogView = inflater.inflate(R.layout.dialog_delete_confirmation, null);
+
+        android.app.AlertDialog dialog = new android.app.AlertDialog.Builder(requireContext())
+                .setView(dialogView)
+                .create();
+
+        // Make dialog background transparent so our custom background shows
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        dialogView.findViewById(R.id.btn_cancel).setOnClickListener(v -> dialog.dismiss());
+        dialogView.findViewById(R.id.btn_delete).setOnClickListener(v -> {
+            viewModel.delete(reminder);
+            dialog.dismiss();
+        });
+
+        dialog.show();
     }
 
     @Override
@@ -128,15 +140,31 @@ public class HomeFragment extends Fragment implements ReminderAdapter.OnItemClic
         @Override
         public boolean onActionItemClicked(android.view.ActionMode mode, android.view.MenuItem item) {
             if (item.getItemId() == R.id.action_delete_selected) {
-                new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext(),
-                        R.style.ThemeOverlay_App_MaterialAlertDialog_Destructive)
-                        .setTitle("Delete " + adapter.getSelectedItems().size() + " Reminders?")
-                        .setPositiveButton("Delete", (dialog, which) -> {
-                            viewModel.delete(adapter.getSelectedItems());
-                            mode.finish();
-                        })
-                        .setNegativeButton("Cancel", null)
-                        .show();
+                int count = adapter.getSelectedItems().size();
+
+                android.view.LayoutInflater inflater = getLayoutInflater();
+                android.view.View dialogView = inflater.inflate(R.layout.dialog_delete_confirmation, null);
+
+                // Update title for bulk delete
+                android.widget.TextView titleView = dialogView.findViewById(R.id.dialog_title);
+                titleView.setText("Delete " + count + (count == 1 ? " Reminder?" : " Reminders?"));
+
+                android.app.AlertDialog dialog = new android.app.AlertDialog.Builder(requireContext())
+                        .setView(dialogView)
+                        .create();
+
+                if (dialog.getWindow() != null) {
+                    dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+                }
+
+                dialogView.findViewById(R.id.btn_cancel).setOnClickListener(v -> dialog.dismiss());
+                dialogView.findViewById(R.id.btn_delete).setOnClickListener(v -> {
+                    viewModel.delete(adapter.getSelectedItems());
+                    mode.finish();
+                    dialog.dismiss();
+                });
+
+                dialog.show();
                 return true;
             }
             return false;
