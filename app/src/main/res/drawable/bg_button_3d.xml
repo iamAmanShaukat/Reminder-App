@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Pressed state: Shadow reduces, content moves down -->
+    <item android:state_pressed="true">
+        <layer-list>
+            <item>
+                <shape android:shape="rectangle">
+                    <corners android:radius="12dp" />
+                    <solid android:color="@color/btn_3d_base" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+
+    <!-- Default state: Shadow visible at bottom -->
+    <item>
+        <layer-list>
+            <!-- Shadow Layer -->
+            <item android:top="4dp" android:left="0dp" android:right="0dp" android:bottom="0dp">
+                <shape android:shape="rectangle">
+                    <corners android:radius="12dp" />
+                    <solid android:color="@color/btn_3d_shadow" />
+                </shape>
+            </item>
+            <!-- Main Button Face -->
+            <item android:bottom="4dp">
+                <shape android:shape="rectangle">
+                    <corners android:radius="12dp" />
+                    <solid android:color="@color/btn_3d_base" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+</selector>

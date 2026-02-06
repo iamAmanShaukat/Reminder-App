@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@color/background_page">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="20dp">
+
+        <TextView
+            android:id="@+id/tvHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New Reminder"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:letterSpacing="-0.02"
+            android:layout_marginTop="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Input Group (Glass Card) -->
+        <LinearLayout
+            android:id="@+id/containerInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="vertical"
+            android:background="@drawable/bg_card_glass"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="12dp"
+            app:layout_constraintTop_toBottomOf="@id/tvHeader">
+
+            <EditText
+                android:id="@+id/etTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="What needs done?"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_tertiary"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:background="@null" 
+                android:minHeight="48dp"
+                android:inputType="textCapSentences" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#1AFFFFFF"
+                android:layout_marginVertical="8dp"/>
+
+            <EditText
+                android:id="@+id/etDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Add details..."
+                android:textColor="@color/text_secondary"
+                android:textColorHint="@color/text_tertiary"
+                android:textSize="16sp"
+                android:background="@null"
+                android:minLines="3"
+                android:gravity="top"
+                android:inputType="textMultiLine|textCapSentences" />
+        </LinearLayout>
+
+        <!-- Tiles Section -->
+        <LinearLayout
+            android:id="@+id/containerTiles"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal"
+            android:weightSum="2"
+            app:layout_constraintTop_toBottomOf="@id/containerInput">
+
+            <!-- Date Tile -->
+            <LinearLayout
+                 android:id="@+id/btnDateContainer"
+                 android:layout_width="0dp"
+                 android:layout_height="wrap_content"
+                 android:layout_weight="1"
+                 android:layout_marginEnd="8dp"
+                 android:orientation="vertical"
+                 android:padding="16dp"
+                 android:background="@drawable/bg_button_neu"
+                 android:clickable="true"
+                 android:focusable="true">
+                 
+                 <ImageView
+                     android:layout_width="24dp"
+                     android:layout_height="24dp"
+                     android:src="@android:drawable/ic_menu_my_calendar"
+                     app:tint="@color/brand_accent"
+                     android:contentDescription="Date Icon"/>
+                     
+                 <TextView
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:layout_marginTop="8dp"
+                     android:text="Date"
+                     android:textColor="@color/text_tertiary"
+                     android:textSize="12sp"
+                     android:textAllCaps="true"
+                     android:letterSpacing="0.05"/>
+
+                 <TextView
+                     android:id="@+id/btnDate"
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content"
+                     android:background="@null"
+                     android:text="Today"
+                     android:textColor="@color/text_primary"
+                     android:textSize="16sp"
+                     android:textStyle="bold"
+                     android:layout_marginTop="2dp"
+                     android:duplicateParentState="true"/> <!-- Passes click to parent -->
+            </LinearLayout>
+
+            <!-- Time Tile -->
+             <LinearLayout
+                 android:id="@+id/btnTimeContainer"
+                 android:layout_width="0dp"
+                 android:layout_height="wrap_content"
+                 android:layout_weight="1"
+                 android:layout_marginStart="8dp"
+                 android:orientation="vertical"
+                 android:padding="16dp"
+                 android:background="@drawable/bg_button_neu"
+                 android:clickable="true"
+                 android:focusable="true">
+                 
+                 <ImageView
+                     android:layout_width="24dp"
+                     android:layout_height="24dp"
+                     android:src="@android:drawable/ic_menu_recent_history"
+                     app:tint="@color/brand_glow"
+                     android:contentDescription="Time Icon"/>
+                     
+                 <TextView
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:layout_marginTop="8dp"
+                     android:text="Time"
+                     android:textColor="@color/text_tertiary"
+                     android:textSize="12sp"
+                     android:textAllCaps="true"
+                     android:letterSpacing="0.05"/>
+
+                 <TextView
+                     android:id="@+id/btnTime"
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content"
+                     android:background="@null"
+                     android:text="Set Time"
+                     android:textColor="@color/text_primary"
+                     android:textSize="16sp"
+                     android:textStyle="bold"
+                     android:layout_marginTop="2dp"
+                     android:duplicateParentState="true"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- All Day Switch Row -->
+        <LinearLayout
+            android:id="@+id/containerAllDay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp" 
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_card_glass"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="12dp"
+            app:layout_constraintTop_toBottomOf="@id/containerTiles">
+            
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="All Day Reminder"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold"/>
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/switchAllDay"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:thumbTint="@color/white"
+                app:trackTint="@color/brand_accent" />
+        </LinearLayout>
+
+        <!-- Repeat Row -->
+        <LinearLayout
+            android:id="@+id/containerRepeat"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp" 
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_card_glass"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="12dp"
+            app:layout_constraintTop_toBottomOf="@id/containerAllDay">
+            
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@android:drawable/ic_menu_rotate"
+                app:tint="@color/brand_accent"
+                android:layout_marginEnd="16dp"
+                android:contentDescription="Repeat Icon"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Repeat"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/tvRepeat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Does not repeat"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp"
+                android:padding="8dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"/>
+        </LinearLayout>
+        
+        <!-- Save Button (Bottom) -->
+        <Button
+            android:id="@+id/btnSave"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save Task"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintVertical_bias="1.0"
+            app:layout_constraintTop_toBottomOf="@id/containerRepeat" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>
+

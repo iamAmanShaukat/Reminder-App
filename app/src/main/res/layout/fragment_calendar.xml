@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_primary">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/bg_primary"
+        android:elevation="0dp"
+        app:elevation="0dp">
+
+        <!-- Scrollable Content: Calendar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_scrollFlags="scroll|enterAlways|snap">
+
+            <!-- Month Header -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="16dp">
+
+                <ImageButton
+                    android:id="@+id/btnPrevMonth"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_chevron_left"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    app:tint="@color/text_primary"
+                    android:contentDescription="Previous Month" />
+
+                <TextView
+                    android:id="@+id/tvMonthName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="January 2026"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary"
+                    android:gravity="center" />
+
+                <ImageButton
+                    android:id="@+id/btnNextMonth"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_chevron_right"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    app:tint="@color/text_primary"
+                    android:contentDescription="Next Month" />
+            </LinearLayout>
+
+            <!-- Days Header -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingBottom="8dp">
+                <TextView style="@style/CalendarDayHeader" android:text="Sun" />
+                <TextView style="@style/CalendarDayHeader" android:text="Mon" />
+                <TextView style="@style/CalendarDayHeader" android:text="Tue" />
+                <TextView style="@style/CalendarDayHeader" android:text="Wed" />
+                <TextView style="@style/CalendarDayHeader" android:text="Thu" />
+                <TextView style="@style/CalendarDayHeader" android:text="Fri" />
+                <TextView style="@style/CalendarDayHeader" android:text="Sat" />
+            </LinearLayout>
+
+            <!-- Grid -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvCalendar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:clipToPadding="false"
+                tools:itemCount="35"
+                tools:listitem="@layout/item_calendar_day" />
+        </LinearLayout>
+
+        <!-- Pinned Content: Selected Date Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/bg_primary">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?attr/dividerVertical"
+                android:alpha="0.2"
+                android:layout_marginVertical="8dp"/>
+
+            <TextView
+                android:id="@+id/tvSelectedDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="16dp"
+                android:paddingBottom="8dp"
+                android:text="Selected Date"
+                android:textColor="@color/text_primary"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Task List -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvReminders"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingHorizontal="16dp"
+        android:clipToPadding="false"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:listitem="@layout/item_reminder" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

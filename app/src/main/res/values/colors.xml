@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Backgrounds: Deep, rich darks (Not just black) -->
+    <!-- Apple: #000000, CRED: #101112 or #0f0f0f with noise -->
+    <color name="background_page">#0F0F10</color> 
+    <color name="background_surface">#1C1C1E</color> <!-- Apple Dark Gray -->
+    
+    <!-- Glassmorphism -->
+    <color name="glass_surface">#262628</color> <!-- Slightly lighter for cards -->
+    <color name="glass_stroke">#3A3A3C</color> <!-- Subtle border -->
+
+    <!-- Accents: High Contrast Neon/Pastel -->
+    <color name="accent_primary">#E9E9EB</color> <!-- Primary Text (Off White) -->
+    <color name="accent_secondary">#8E8E93</color> <!-- Secondary Text (Gray) -->
+    
+    <!-- CRED-like Brand Accents (Subtle but glowing) -->
+    <color name="brand_glow">#525AFF</color> <!-- Electric Indigo -->
+    <color name="brand_accent">#0A84FF</color> <!-- Apple Blue -->
+
+    <!-- Text Colors -->
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#AEAEB2</color>
+    <color name="text_tertiary">#636366</color>
+
+    <!-- Semantic -->
+    <color name="color_delete">#FF453A</color> <!-- Apple Red -->
+    <color name="color_check">#30D158</color> <!-- Apple Green -->
+    
+    <!-- Widget Specific -->
+    <color name="sticky_bg_start">#1C1C1E</color>
+    <color name="sticky_bg_end">#2C2C2E</color>
+
+    <!-- Legacy Mappings for compatibility -->
+    <color name="primary">#0A84FF</color>
+    <color name="primary_variant">#0040DD</color>
+    <color name="secondary">#5E5CE6</color>
+    <color name="background">@color/background_page</color>
+    <color name="surface">@color/background_surface</color>
+    <color name="on_primary">#FFFFFF</color>
+    <color name="on_secondary">#FFFFFF</color>
+    <color name="on_surface">@color/text_primary</color>
+    <color name="on_background">@color/text_primary</color>
+    <!-- Standard API Colors -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+
+    <!-- Missing 3D Button Colors (Restored for Dark Mode) -->
+    <color name="btn_3d_base">@color/brand_accent</color>
+    <color name="btn_3d_shadow">#0040DD</color> <!-- Darker Blue -->
+    <color name="btn_3d_highlight">#54A3FF</color>
+    
+    <!-- Missing Widget Colors (Restored for Dark Mode) -->
+    <color name="sticky_text">@color/text_primary</color>
+    <color name="sticky_yellow_dark">@color/glass_stroke</color> <!-- Used as divider -->
+
+    <!-- Aliases for Settings Screen -->
+    <color name="bg_primary">@color/background_page</color>
+    <color name="text_hint">@color/text_secondary</color>
+
+</resources>

@@ -1,0 +1,84 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <!-- Base application theme. FORCE DARK. -->
+    <style name="Theme.Reminder" parent="Theme.Material3.Dark.NoActionBar">
+        <!-- Brand Colors -->
+        <item name="colorPrimary">@color/brand_accent</item>
+        <item name="colorPrimaryVariant">@color/brand_glow</item>
+        <item name="colorOnPrimary">@color/white</item>
+        
+        <!-- Backgrounds -->
+        <item name="android:colorBackground">@color/background_page</item>
+        <item name="colorSurface">@color/background_surface</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        
+        <!-- Status Bar -->
+        <item name="android:statusBarColor">@color/background_page</item>
+        <item name="android:windowLightStatusBar">false</item>
+        
+        <!-- Typography -->
+         <item name="android:fontFamily">sans-serif</item>
+         
+         <!-- Dialog Theme -->
+         <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>
+    </style>
+    
+    <style name="Widget.Reminder.Button.3D" parent="Widget.Material3.Button">
+        <item name="android:background">@drawable/bg_button_3d</item>
+        <item name="backgroundTint">@null</item> <!-- Important to allow drawable colors -->
+        <item name="android:textColor">@color/on_primary</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="elevation">0dp</item> <!-- Drawable handles shadow -->
+        <item name="android:stateListAnimator">@null</item> <!-- Disable default elevation animation -->
+    </style>
+    <style name="CalendarDayHeader">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- Custom Alert Dialog Theme -->
+    <style name="ThemeOverlay.App.MaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="android:background">@drawable/bg_dialog</item>
+        <item name="colorSurface">@color/background_surface</item>
+        <item name="colorPrimary">@color/brand_accent</item> <!-- Button Text Color -->
+        <item name="colorOnSurface">@color/text_primary</item> <!-- Title/Message Text Color -->
+        
+        <!-- Typography for Dialog -->
+        <item name="materialAlertDialogTitleTextStyle">@style/DialogTitle</item>
+        <item name="materialAlertDialogBodyTextStyle">@style/DialogBody</item>
+        
+        <!-- Shape -->
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearance.App.Dialog</item>
+    </style>
+
+    <style name="ThemeOverlay.App.MaterialAlertDialog.Destructive" parent="ThemeOverlay.App.MaterialAlertDialog">
+        <!-- Only override Positive Button (Delete) to be Red -->
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.App.Button.Destructive</item>
+    </style>
+
+    <style name="Widget.App.Button.Destructive" parent="Widget.Material3.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/color_delete</item>
+    </style>
+
+    <style name="ShapeAppearance.App.Dialog" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">28dp</item>
+    </style>
+    
+    <style name="DialogTitle" parent="MaterialAlertDialog.Material3.Title.Text">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    
+    <style name="DialogBody" parent="MaterialAlertDialog.Material3.Body.Text">
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+</resources>

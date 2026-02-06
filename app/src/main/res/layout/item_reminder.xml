@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardBackgroundColor="@android:color/transparent"
+    app:cardElevation="0dp"
+    app:cardCornerRadius="20dp"
+    app:strokeWidth="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="0dp">
+
+        <!-- Date Separator/Header (Hidden by default) -->
+        <LinearLayout
+            android:id="@+id/containerHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:paddingBottom="8dp">
+
+            <TextView
+                android:id="@+id/tvHeaderDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Yesterday"
+                android:textColor="@color/brand_accent"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:layout_marginBottom="4dp"
+                android:layout_marginStart="20dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/glass_stroke"
+                android:alpha="0.5"
+                android:layout_marginBottom="8dp"/>
+        </LinearLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/containerContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_card_glass"
+            android:padding="20dp">
+
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/cbComplete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                app:buttonTint="@color/brand_accent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:text="Reminder Title"
+                android:textColor="@color/text_primary"
+                android:textSize="18sp"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.02"
+                app:layout_constraintStart_toEndOf="@id/cbComplete"
+                app:layout_constraintEnd_toStartOf="@id/btnDelete"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tvDescription"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Description goes here..."
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp"
+                android:maxLines="2"
+                android:ellipsize="end"
+                app:layout_constraintStart_toStartOf="@id/tvTitle"
+                app:layout_constraintEnd_toEndOf="@id/tvTitle"
+                app:layout_constraintTop_toBottomOf="@id/tvTitle" />
+
+            <TextView
+                android:id="@+id/tvTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="10:00 AM"
+                android:textColor="@color/brand_accent"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:background="@drawable/bg_button_neu"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="4dp"
+                app:layout_constraintStart_toStartOf="@id/tvTitle"
+                app:layout_constraintTop_toBottomOf="@id/tvDescription" />
+
+            <ImageButton
+                android:id="@+id/btnDelete"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@android:drawable/ic_menu_delete"
+                android:background="?selectableItemBackgroundBorderless"
+                app:tint="@color/text_tertiary"
+                android:contentDescription="Delete"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>
