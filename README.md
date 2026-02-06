@@ -1,6 +1,6 @@
 # 📱 Reminder - Android Task Management App
 
-A modern, premium Android reminder application built with Java, featuring a beautiful dark UI inspired by CRED and Apple design aesthetics. Stay organized with smart notifications, home screen widgets, and an intuitive calendar view.
+A modern, premium Android reminder application built with Java, featuring a beautiful dark UI. Stay organized with smart notifications, home screen widgets, and an intuitive calendar view.
 
 ## ✨ Features
 
@@ -186,20 +186,5 @@ Edit `app/src/main/res/layout/widget_sticky_note.xml` for the widget appearance.
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 👨‍💻 Developer
-
-Built with ❤️ using modern Android development practices.
-
----
 
 **⭐ If you find this project helpful, please consider giving it a star!**
