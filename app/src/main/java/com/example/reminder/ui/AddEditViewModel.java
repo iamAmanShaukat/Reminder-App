@@ -22,7 +22,6 @@ public class AddEditViewModel extends ViewModel {
     }
 
     public void saveReminder(Reminder reminder) {
-        android.util.Log.d("AddEditViewModel", "Saving reminder: " + reminder.getTitle());
         if (reminder.getId() == 0) {
             repository.insert(reminder, id -> {
                 reminder.setId((int) id);
@@ -37,7 +36,6 @@ public class AddEditViewModel extends ViewModel {
     }
 
     public void deleteReminder(Reminder reminder) {
-        android.util.Log.d("AddEditViewModel", "Deleting reminder: " + reminder.getId());
         AlarmReceiver.cancelAlarm(context, reminder);
         repository.delete(reminder);
         com.example.reminder.widget.StickyNoteWidgetProvider.sendRefreshBroadcast(context);

@@ -27,10 +27,12 @@ public class TemplateManager {
                 .emoji("💊")
                 .title("Take Medicine")
                 .description("Remember to take your medication")
-                .repeatMode("DAILY")
-                .addTime(8, 0, "Morning")
-                .addTime(14, 0, "Afternoon")
-                .addTime(20, 0, "Evening")
+                .repeatMode("CUSTOM")
+                .repeatInterval(6 * 60 * 60 * 1000L) // 6 hours
+                .repeatDays("1,2,3,4,5,6,7")
+                .windowStart(480) // 8:00 AM
+                .windowEnd(1320) // 10:00 PM
+                .addTime(8, 0, "Start")
                 .category(TemplateCategory.HEALTH)
                 .build());
 
@@ -41,6 +43,9 @@ public class TemplateManager {
                 .description("Stay hydrated! Drink a glass of water")
                 .repeatMode("CUSTOM")
                 .repeatInterval(2 * 60 * 60 * 1000L) // 2 hours
+                .repeatDays("1,2,3,4,5,6,7") // Every day
+                .windowStart(480) // 8:00 AM
+                .windowEnd(1320) // 10:00 PM
                 .addTime(8, 0, "Start")
                 .category(TemplateCategory.HEALTH)
                 .build());
@@ -93,9 +98,12 @@ public class TemplateManager {
                 .emoji("🪥")
                 .title("Brush Teeth")
                 .description("Maintain dental hygiene")
-                .repeatMode("DAILY")
+                .repeatMode("CUSTOM")
+                .repeatInterval(14 * 60 * 60 * 1000L) // 14 hours
+                .repeatDays("1,2,3,4,5,6,7")
+                .windowStart(480) // 8:00 AM
+                .windowEnd(1320) // 10:00 PM
                 .addTime(8, 0, "Morning")
-                .addTime(22, 0, "Night")
                 .category(TemplateCategory.PERSONAL)
                 .build());
 

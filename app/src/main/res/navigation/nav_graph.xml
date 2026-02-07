@@ -24,11 +24,21 @@
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.example.reminder.ui.SettingsFragment"
-        android:label="Settings" />
+        android:label="Settings">
+        <action
+            android:id="@+id/action_settingsFragment_to_helpFragment"
+            app:destination="@id/helpFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/calendarFragment"
         android:name="com.example.reminder.ui.calendar.CalendarFragment"
         android:label="Calendar"
         tools:layout="@layout/fragment_calendar" />
+
+    <fragment
+        android:id="@+id/helpFragment"
+        android:name="com.example.reminder.ui.HelpFragment"
+        android:label="How to Use"
+        tools:layout="@layout/fragment_help" />
 </navigation>

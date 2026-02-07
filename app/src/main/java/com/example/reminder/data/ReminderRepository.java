@@ -35,7 +35,7 @@ public class ReminderRepository {
         executorService.execute(() -> {
             try {
                 reminderDao.insertReminder(reminder);
-                android.util.Log.d("ReminderRepository", "Inserted reminder: " + reminder.getTitle());
+                reminderDao.insertReminder(reminder);
             } catch (Exception e) {
                 android.util.Log.e("ReminderRepository", "Error inserting reminder", e);
             }
@@ -49,7 +49,9 @@ public class ReminderRepository {
                 if (listener != null) {
                     listener.onInserted(id);
                 }
-                android.util.Log.d("ReminderRepository", "Inserted reminder with ID: " + id);
+                if (listener != null) {
+                    listener.onInserted(id);
+                }
             } catch (Exception e) {
                 android.util.Log.e("ReminderRepository", "Error inserting reminder with listener", e);
             }
@@ -60,7 +62,7 @@ public class ReminderRepository {
         executorService.execute(() -> {
             try {
                 reminderDao.updateReminder(reminder);
-                android.util.Log.d("ReminderRepository", "Updated reminder: " + reminder.getId());
+                reminderDao.updateReminder(reminder);
             } catch (Exception e) {
                 android.util.Log.e("ReminderRepository", "Error updating reminder", e);
             }
@@ -71,7 +73,7 @@ public class ReminderRepository {
         executorService.execute(() -> {
             try {
                 reminderDao.deleteReminder(reminder);
-                android.util.Log.d("ReminderRepository", "Deleted reminder: " + reminder.getId());
+                reminderDao.deleteReminder(reminder);
             } catch (Exception e) {
                 android.util.Log.e("ReminderRepository", "Error deleting reminder", e);
             }
@@ -82,7 +84,7 @@ public class ReminderRepository {
         executorService.execute(() -> {
             try {
                 reminderDao.deleteReminders(reminders);
-                android.util.Log.d("ReminderRepository", "Deleted " + reminders.size() + " reminders");
+                reminderDao.deleteReminders(reminders);
             } catch (Exception e) {
                 android.util.Log.e("ReminderRepository", "Error deleting reminders batch", e);
             }

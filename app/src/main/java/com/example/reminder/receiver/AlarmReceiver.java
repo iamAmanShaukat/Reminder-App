@@ -32,12 +32,6 @@ public class AlarmReceiver extends BroadcastReceiver {
 
         if (action == null) {
             // Triggered by AlarmManager - Show Notification
-            // We need to fetch the reminder from DB to get latest details
-            // Since onReceive is main thread and DB is async, we use a workaround or
-            // executor
-            // For simplicity in this structure, using repository executor indirectly
-            // Note: In production, consider using GoAsync or WorkManager for reliably
-            // ensuring DB completes
             // Acquire WakeLock to ensure work completes
             android.os.PowerManager pm = (android.os.PowerManager) context.getSystemService(Context.POWER_SERVICE);
             android.os.PowerManager.WakeLock wakeLock = pm.newWakeLock(android.os.PowerManager.PARTIAL_WAKE_LOCK,
@@ -48,17 +42,14 @@ public class AlarmReceiver extends BroadcastReceiver {
                 try {
                     Reminder reminder = repository.getReminderSync(reminderId);
                     if (reminder != null && !reminder.isCompleted()) {
-                        Log.d("AlarmReceiver", "Showing notification for: " + reminder.getTitle());
                         NotificationHelper.createNotificationChannel(context);
                         NotificationHelper.showNotification(context, reminder);
 
                         // Reschedule if repeating
                         rescheduleIfRepeating(context, reminder);
-                    } else {
-                        Log.w("AlarmReceiver", "Reminder not found or completed for ID: " + reminderId);
                     }
                 } catch (Exception e) {
-                    Log.e("AlarmReceiver", "Error handling alarm receive", e);
+                    // Ignore
                 } finally {
                     if (wakeLock.isHeld()) {
                         wakeLock.release();
@@ -92,40 +83,125 @@ public class AlarmReceiver extends BroadcastReceiver {
 
     private void rescheduleIfRepeating(Context context, Reminder reminder) {
         long nextTime = 0;
-        switch (reminder.getRepeatMode()) {
-            case "HOURLY":
-                nextTime = reminder.getTimeMillis() + AlarmManager.INTERVAL_HOUR;
-                break;
-            case "DAILY":
-                nextTime = reminder.getTimeMillis() + AlarmManager.INTERVAL_DAY;
-                break;
-            case "WEEKLY":
-                nextTime = reminder.getTimeMillis() + AlarmManager.INTERVAL_DAY * 7;
-                break;
-            case "MONTHLY":
-                // Approximate monthly (30 days) for simplicity, or use Calendar for accuracy
-                // Using Calendar is better
-                java.util.Calendar cal = java.util.Calendar.getInstance();
-                cal.setTimeInMillis(reminder.getTimeMillis());
-                cal.add(java.util.Calendar.MONTH, 1);
-                nextTime = cal.getTimeInMillis();
-                break;
-            case "CUSTOM":
-                if (reminder.getRepeatInterval() > 0) {
-                    nextTime = reminder.getTimeMillis() + reminder.getRepeatInterval();
-                }
-                break;
-            case "NONE":
-            default:
-                return;
+        String repeatMode = reminder.getRepeatMode();
+
+        if ("CUSTOM".equals(repeatMode)) {
+            nextTime = calculateNextCustomTime(reminder);
+        } else {
+            // Standard modes
+            long interval = 0;
+            switch (repeatMode) {
+                case "HOURLY":
+                    interval = AlarmManager.INTERVAL_HOUR;
+                    break;
+                case "DAILY":
+                    interval = AlarmManager.INTERVAL_DAY;
+                    break;
+                case "WEEKLY":
+                    interval = AlarmManager.INTERVAL_DAY * 7;
+                    break;
+                case "MONTHLY":
+                    java.util.Calendar cal = java.util.Calendar.getInstance();
+                    cal.setTimeInMillis(reminder.getTimeMillis());
+                    cal.add(java.util.Calendar.MONTH, 1);
+                    interval = cal.getTimeInMillis() - reminder.getTimeMillis();
+                    break;
+            }
+            if (interval > 0) {
+                nextTime = reminder.getTimeMillis() + interval;
+            }
         }
 
         if (nextTime > System.currentTimeMillis()) {
             reminder.setTimeMillis(nextTime);
+            // Updating the reminder in DB via repository executor
             repository.update(reminder);
             scheduleAlarm(context, reminder);
-            Log.d("AlarmReceiver", "Rescheduled recurring reminder: " + reminder.getTitle() + " to " + nextTime);
         }
+    }
+
+    private long calculateNextCustomTime(Reminder reminder) {
+        long lastTime = reminder.getTimeMillis();
+        long interval = reminder.getRepeatInterval();
+
+        // If interval is 0, treat as daily (fallback)
+        if (interval <= 0)
+            return lastTime + AlarmManager.INTERVAL_DAY;
+
+        // 1. Proposed next time based on interval
+        long next = lastTime + interval;
+
+        // 2. Load constraints
+        String daysStr = reminder.getRepeatDays(); // "1,2,3,4,5"
+        Integer winStart = reminder.getWindowStart(); // Minutes from midnight
+        Integer winEnd = reminder.getWindowEnd(); // Minutes from midnight
+
+        // If no constraints, just return next
+        if (daysStr == null || daysStr.isEmpty())
+            return next;
+
+        // Parse days
+        java.util.Set<Integer> validDays = new java.util.HashSet<>();
+        try {
+            for (String d : daysStr.split(",")) {
+                validDays.add(Integer.parseInt(d));
+            }
+        } catch (NumberFormatException e) {
+            return next; // Fail safe
+        }
+
+        // Logic to find next valid slot
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.setTimeInMillis(next);
+
+        // Safety break to prevent infinite loops (e.g. no days selected)
+        int safeguards = 0;
+        while (safeguards < 365) { // Check up to a year ahead
+            int currentDay = cal.get(java.util.Calendar.DAY_OF_WEEK);
+            int currentMinutes = cal.get(java.util.Calendar.HOUR_OF_DAY) * 60 + cal.get(java.util.Calendar.MINUTE);
+
+            // Check Day Validity
+            if (validDays.contains(currentDay)) {
+                // Check Window Validity (if defined)
+                boolean windowValid = true;
+                if (winStart != null && winEnd != null) {
+                    if (currentMinutes < winStart) {
+                        // Too early: Move to window start
+                        cal.set(java.util.Calendar.HOUR_OF_DAY, winStart / 60);
+                        cal.set(java.util.Calendar.MINUTE, winStart % 60);
+                        cal.set(java.util.Calendar.SECOND, 0);
+                        return cal.getTimeInMillis();
+                    } else if (currentMinutes > winEnd) {
+                        // Too late: Window invalid for today
+                        windowValid = false;
+                    }
+                    // Else: Valid
+                }
+
+                if (windowValid) {
+                    return cal.getTimeInMillis();
+                }
+            }
+
+            // If we are here, today/this time is invalid.
+            // Move to start of NEXT day (or next validity check)
+            // If we have a window, aim for window start of next day.
+            cal.add(java.util.Calendar.DAY_OF_YEAR, 1);
+            if (winStart != null) {
+                cal.set(java.util.Calendar.HOUR_OF_DAY, winStart / 60);
+                cal.set(java.util.Calendar.MINUTE, winStart % 60);
+                cal.set(java.util.Calendar.SECOND, 0);
+            } else {
+                // Keep same time if no window, just next day
+                // Actually logic suggests resetting to 00:00 if day was invalid?
+                // But simpler to just keep adding days until we hit a valid day, preserving
+                // time
+                // unless window is enforced.
+            }
+            safeguards++;
+        }
+
+        return next; // Fallback
     }
 
     private void scheduleSnooze(Context context, int reminderId) {
@@ -148,8 +224,6 @@ public class AlarmReceiver extends BroadcastReceiver {
         } else {
             alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
         }
-
-        Log.d("AlarmReceiver", "Snoozed reminder " + reminderId + " for " + snoozeMinutes + " minutes");
     }
 
     public static void scheduleAlarm(Context context, Reminder reminder) {

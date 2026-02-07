@@ -58,9 +58,10 @@
                 android:id="@+id/cbComplete"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
-                app:buttonTint="@color/brand_accent"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                android:button="@drawable/ic_tick"
+                app:buttonTint="@color/selector_tick_tint"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"/>
@@ -107,6 +108,21 @@
                 android:paddingVertical="4dp"
                 app:layout_constraintStart_toStartOf="@id/tvTitle"
                 app:layout_constraintTop_toBottomOf="@id/tvDescription" />
+
+            <TextView
+                android:id="@+id/tvRepeatDays"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:text="S M T W T F S"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.1"
+                android:textColor="@color/text_tertiary"
+                android:visibility="gone"
+                app:layout_constraintStart_toEndOf="@id/tvTime"
+                app:layout_constraintTop_toTopOf="@id/tvTime"
+                app:layout_constraintBottom_toBottomOf="@id/tvTime" />
 
             <ImageButton
                 android:id="@+id/btnDelete"

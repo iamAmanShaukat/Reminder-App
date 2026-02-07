@@ -116,4 +116,33 @@ public class Reminder implements Serializable {
     public void setHideFromWidget(boolean hideFromWidget) {
         this.hideFromWidget = hideFromWidget;
     }
+
+    // Advanced Repeat Options
+    private String repeatDays; // CSV of days (1=Sun, 2=Mon, etc.)
+    private Integer windowStart; // Minutes from midnight (e.g. 480 = 8:00 AM)
+    private Integer windowEnd; // Minutes from midnight (e.g. 1200 = 8:00 PM)
+
+    public String getRepeatDays() {
+        return repeatDays;
+    }
+
+    public void setRepeatDays(String repeatDays) {
+        this.repeatDays = repeatDays;
+    }
+
+    public Integer getWindowStart() {
+        return windowStart;
+    }
+
+    public void setWindowStart(Integer windowStart) {
+        this.windowStart = windowStart;
+    }
+
+    public Integer getWindowEnd() {
+        return windowEnd;
+    }
+
+    public void setWindowEnd(Integer windowEnd) {
+        this.windowEnd = windowEnd;
+    }
 }

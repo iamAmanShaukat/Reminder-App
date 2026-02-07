@@ -175,7 +175,13 @@ public class ReminderAdapter extends ListAdapter<Reminder, ReminderAdapter.Remin
                 tvDescription.setVisibility(View.GONE);
             }
 
-            SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, d MMM - hh:mm a", Locale.getDefault());
+            SimpleDateFormat dateFormat;
+            String repeatMode = reminder.getRepeatMode();
+            if (repeatMode != null && !repeatMode.equals("NONE")) {
+                dateFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+            } else {
+                dateFormat = new SimpleDateFormat("EEE, d MMM - hh:mm a", Locale.getDefault());
+            }
             tvTime.setText(dateFormat.format(new Date(reminder.getTimeMillis())));
 
             cbComplete.setOnCheckedChangeListener(null);
@@ -212,6 +218,78 @@ public class ReminderAdapter extends ListAdapter<Reminder, ReminderAdapter.Remin
                 tvTime.setTextColor(itemView.getContext().getColor(R.color.color_delete));
             } else {
                 tvTime.setTextColor(itemView.getContext().getColor(R.color.text_secondary));
+            }
+
+            // Repeat Days Indicator
+            TextView tvRepeatDays = itemView.findViewById(R.id.tvRepeatDays);
+            String daysStr = reminder.getRepeatDays();
+            String mode = reminder.getRepeatMode();
+
+            if (mode != null && !mode.equals("NONE")) {
+                tvRepeatDays.setVisibility(View.VISIBLE);
+
+                // Determine active days
+                java.util.Set<Integer> activeDays = new java.util.HashSet<>();
+                if ("DAILY".equals(mode)) {
+                    // All days
+                    for (int i = 1; i <= 7; i++)
+                        activeDays.add(i);
+                } else if (daysStr != null && !daysStr.isEmpty()) {
+                    for (String d : daysStr.split(",")) {
+                        try {
+                            activeDays.add(Integer.parseInt(d.trim()));
+                        } catch (NumberFormatException ignored) {
+                        }
+                    }
+                } else if ("WEEKLY".equals(mode)) {
+                    // Fallback to day of week of start time
+                    java.util.Calendar c = java.util.Calendar.getInstance();
+                    c.setTimeInMillis(reminder.getTimeMillis());
+                    activeDays.add(c.get(java.util.Calendar.DAY_OF_WEEK));
+                }
+
+                // Build "S M T W T F S"
+                // Calendar.SUNDAY = 1 -> S
+                // ...
+                // Calendar.SATURDAY = 7 -> S
+                // Map: 1->S, 2->M, 3->T, 4->W, 5->T, 6->F, 7->S (order in string)
+
+                // We want order: S M T W T F S (Sun to Sat) OR M T W T F S S?
+                // US convention starts Sunday. Let's use S M T W T F S.
+                String fullText = "S M T W T F S";
+                android.text.SpannableString spannable = new android.text.SpannableString(fullText);
+
+                // Indices in string "S M T W T F S"
+                // S(0) M(2) T(4) W(6) T(8) F(10) S(12)
+                int[] mapDayToCharIndex = new int[8]; // 1-based index
+                mapDayToCharIndex[java.util.Calendar.SUNDAY] = 0;
+                mapDayToCharIndex[java.util.Calendar.MONDAY] = 2;
+                mapDayToCharIndex[java.util.Calendar.TUESDAY] = 4;
+                mapDayToCharIndex[java.util.Calendar.WEDNESDAY] = 6;
+                mapDayToCharIndex[java.util.Calendar.THURSDAY] = 8;
+                mapDayToCharIndex[java.util.Calendar.FRIDAY] = 10;
+                mapDayToCharIndex[java.util.Calendar.SATURDAY] = 12;
+
+                int activeColor = itemView.getContext().getColor(R.color.brand_accent);
+                int inactiveColor = itemView.getContext().getColor(R.color.text_tertiary);
+
+                for (int day = java.util.Calendar.SUNDAY; day <= java.util.Calendar.SATURDAY; day++) {
+                    int idx = mapDayToCharIndex[day];
+                    int color = activeDays.contains(day) ? activeColor : inactiveColor;
+
+                    spannable.setSpan(new android.text.style.ForegroundColorSpan(color),
+                            idx, idx + 1, android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+                    // Bold for active
+                    if (activeDays.contains(day)) {
+                        spannable.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD),
+                                idx, idx + 1, android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    }
+                }
+                tvRepeatDays.setText(spannable);
+
+            } else {
+                tvRepeatDays.setVisibility(View.GONE);
             }
 
             if (isSelectionMode) {

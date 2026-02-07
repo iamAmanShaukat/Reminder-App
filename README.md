@@ -1,47 +1,43 @@
 # 📱 Reminder - Android Task Management App
 
-A modern, premium Android reminder application built with Java, featuring a beautiful dark UI. Stay organized with smart notifications, home screen widgets, and an intuitive calendar view.
+A modern, premium Android reminder application built with Java, featuring a beautiful dark UI. Stay organized with smart notifications, home screen widgets, cloud backup, and an intuitive calendar view.
 
 ## ✨ Features
 
 ### 🔔 Smart Notifications
 - **Exact Alarm Scheduling** - Alarms fire precisely at the scheduled time
-- **Custom Repeat Intervals** - Daily, Weekly, Monthly, Hourly, or custom minute-based repeats
+- **Advanced Repeating Tasks** - Customize repeats by specific days (Mon, Wed, Fri) or intervals (every X hours/minutes)
 - **Snooze Functionality** - Configurable snooze duration in settings
 - **All-Day Reminders** - Sticky notifications that persist throughout the day
 - **Rich Actions** - Complete or snooze directly from notifications
-- **Custom Sound & Vibration** - Choose your preferred notification sound
+- **Custom Sound** - Choose your preferred notification ringtone
+
+### 👆 Intuitive Gestures
+- **Swipe Right** - Instantly mark a task as **Complete** (Green tick animation)
+- **Swipe Left** - **Delete** a task (with Undo option)
+- **Quick Templates** - Tap the Glass icon to access pre-set reminders like "Drink Water"
 
 ### 🏠 Home Screen Widget
 - **Sticky Note Design** - Beautiful glassmorphic widget with your upcoming tasks
 - **Smart Date Display** - Shows time for today's tasks, date + time for future tasks
 - **Overdue Indicators** - Visual highlighting for past-due tasks
-- **One-Tap Actions** - Click to open app or add new reminders
-- **Real-time Sync** - Widget updates automatically when tasks change
+- **Interactive** - Tap '+' to add tasks or check completion directly from the home screen
 
-### 📅 Calendar Overview
-- **Monthly View** - Beautiful grid layout with dot indicators for days with reminders
-- **Task Preview** - View all reminders for a selected day
-- **Smooth Animations** - Collapsible calendar with elegant transitions
-- **Quick Navigation** - Easily browse through months
+### 💾 Cloud Backup & Restore
+- **Google Drive Integration** - Securely backup your reminders to your personal Google Drive
+- **One-Tap Restore** - Easily recover your data on a new device
+- **Android Auto Backup** - Seamless system-level backup support
 
 ### 🎨 Premium UI/UX
 - **Dark Mode Only** - Stunning CRED-inspired dark theme
 - **Glassmorphism** - Modern glass-effect cards and panels
 - **Smooth Animations** - Polished transitions and micro-interactions
-- **Date Separators** - Visual grouping of tasks by date in the main list
-- **Multi-Select** - Bulk delete multiple reminders at once
-- **Material Design 3** - Latest Material components throughout
+- **Help Section** - Integrated "How to Use" guide with visual tutorials
 
 ### ⚙️ Settings & Customization
 - **Default Snooze Duration** - Configure your preferred snooze time (5/10/15/30 minutes)
 - **Notification Sound Picker** - Choose from system ringtones
 - **Widget Pinning** - Quick access to add widget to home screen
-
-### 💾 Backup & Persistence
-- **Android Auto Backup** - Automatic cloud backup via Android system
-- **Boot Receiver** - Alarms persist across device restarts
-- **Local Database** - All data stored securely with Room Database
 
 ## 🛠️ Tech Stack
 
@@ -56,6 +52,7 @@ A modern, premium Android reminder application built with Java, featuring a beau
 - **Database**: Room (SQLite)
 - **Async**: LiveData + Executors
 - **Navigation**: Jetpack Navigation Component
+- **Cloud**: Google Sign-In & Drive API
 
 ### Key Libraries
 ```gradle
@@ -69,16 +66,10 @@ implementation 'androidx.room:room-runtime:2.6.0'
 implementation 'com.google.android.material:material:1.11.0'
 implementation 'androidx.navigation:navigation-fragment:2.7.5'
 
-// Widgets
-implementation 'androidx.glance:glance-appwidget:1.0.0' (planned)
+// Cloud Services
+implementation 'com.google.android.gms:play-services-auth:20.7.0'
+implementation 'com.google.api-client:google-api-client-android:2.2.0'
 ```
-
-## 📋 Prerequisites
-
-- **Android Studio**: Arctic Fox or newer
-- **JDK**: 11 or higher
-- **Min SDK**: 26 (Android 8.0 Oreo)
-- **Target SDK**: 34 (Android 14)
 
 ## 🚀 Getting Started
 
@@ -104,25 +95,6 @@ Android Studio should automatically sync Gradle dependencies. If not:
 2. Click the **Run** button (▶️) or press `Shift + F10`
 3. Select your device and click **OK**
 
-## 📱 First Launch Setup
-
-### Required Permissions
-On first launch, the app will request:
-- **Notifications** - To show reminder alerts
-- **Exact Alarms** - For precise scheduling (Android 12+)
-
-### Add Your First Reminder
-1. Tap the **+** button on the home screen
-2. Enter a title and optional description
-3. Set the date and time
-4. Choose a repeat interval (optional)
-5. Tap **Save**
-
-### Pin the Widget
-1. Open the menu (☰) on the home screen
-2. Tap **"Add Widget to Home Screen"**
-3. Or add manually from your launcher's widget picker
-
 ## 📂 Project Structure
 
 ```
@@ -132,7 +104,7 @@ app/src/main/
 │   │   ├── AppDatabase.java
 │   │   ├── Reminder.java      # Entity
 │   │   ├── ReminderDao.java
-│   │   └── ReminderRepository.java
+│   │   └── BackupRepository.java # Google Drive Logic
 │   ├── di/                    # Dependency Injection
 │   │   └── AppModule.java
 │   ├── receiver/              # Broadcast Receivers
@@ -142,7 +114,8 @@ app/src/main/
 │   │   ├── HomeFragment.java
 │   │   ├── AddEditFragment.java
 │   │   ├── SettingsFragment.java
-│   │   └── calendar/
+│   │   ├── HelpFragment.java  # documentation screen
+│   │   └── SwipeCallback.java # Gesture logic
 │   ├── utils/                 # Helpers
 │   │   └── NotificationHelper.java
 │   ├── widget/                # Widget Implementation
@@ -157,34 +130,14 @@ app/src/main/
 └── AndroidManifest.xml
 ```
 
-## 🎨 Customization
-
-### Change Theme Colors
-Edit `app/src/main/res/values/colors.xml`:
-```xml
-<color name="brand_accent">#0A84FF</color>  <!-- Primary accent -->
-<color name="background_page">#0F0F10</color>  <!-- Page background -->
-```
-
-### Modify Widget Layout
-Edit `app/src/main/res/layout/widget_sticky_note.xml` for the widget appearance.
-
-## 🐛 Known Issues
-
-- **Widget Loading**: If the widget shows "Loading", try removing and re-adding it
-- **Notification Sound**: Custom sounds may require storage permission on some devices
-
 ## 🔮 Future Enhancements
 
-- [ ] Google Drive Backup/Restore
 - [ ] Task Categories with color coding
 - [ ] Subtasks and checklists
 - [ ] Location-based reminders
 - [ ] Dark/Light theme toggle
+- [ ] Voice input for reminders
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-
-**⭐ If you find this project helpful, please consider giving it a star!**

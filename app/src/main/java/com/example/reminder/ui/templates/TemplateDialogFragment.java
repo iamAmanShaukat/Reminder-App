@@ -138,6 +138,9 @@ public class TemplateDialogFragment extends BottomSheetDialogFragment
 
             if ("CUSTOM".equals(template.getRepeatMode())) {
                 reminder.setRepeatInterval(template.getRepeatInterval());
+                reminder.setRepeatDays(template.getRepeatDays());
+                reminder.setWindowStart(template.getWindowStart());
+                reminder.setWindowEnd(template.getWindowEnd());
             }
 
             // Hide from widget per user request

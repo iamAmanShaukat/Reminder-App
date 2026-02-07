@@ -58,9 +58,14 @@ public class SettingsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
 
-        setupSnoozeSpinner();
+        setupSnoozeSelector();
+        setupRingtonePicker();
+        setupSnoozeSelector();
         setupRingtonePicker();
         setupBackupUI();
+
+        binding.containerHelp.setOnClickListener(v -> androidx.navigation.Navigation.findNavController(v)
+                .navigate(com.example.reminder.R.id.action_settingsFragment_to_helpFragment));
     }
 
     @javax.inject.Inject
@@ -180,7 +185,7 @@ public class SettingsFragment extends Fragment {
                 }
             });
 
-    private void setupSnoozeSpinner() {
+    private void setupSnoozeSelector() {
         List<String> labels = new ArrayList<>();
         List<Integer> values = new ArrayList<>();
 
@@ -193,27 +198,62 @@ public class SettingsFragment extends Fragment {
         labels.add("30 Minutes");
         values.add(30);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_spinner_item, labels);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        binding.spinnerSnooze.setAdapter(adapter);
-
         // Load saved value
         int savedValue = prefs.getInt(KEY_SNOOZE_DURATION, 10);
         int position = values.indexOf(savedValue);
-        if (position >= 0) {
-            binding.spinnerSnooze.setSelection(position);
-        }
+        if (position < 0)
+            position = 1; // Default 10 min
 
-        binding.spinnerSnooze.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
-                prefs.edit().putInt(KEY_SNOOZE_DURATION, values.get(position)).apply();
-            }
+        binding.tvSnoozeDuration.setText(labels.get(position));
 
-            @Override
-            public void onNothingSelected(android.widget.AdapterView<?> parent) {
+        binding.containerSnooze.setOnClickListener(v -> {
+            // Inflate Custom Popup
+            View popupView = getLayoutInflater().inflate(com.example.reminder.R.layout.popup_snooze_menu, null);
+
+            final android.widget.PopupWindow popupWindow = new android.widget.PopupWindow(
+                    popupView,
+                    android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+                    android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+                    true);
+
+            // Set elevation
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                popupWindow.setElevation(10);
             }
+            popupWindow.setBackgroundDrawable(
+                    new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+            // Helper to handle clicks
+            View.OnClickListener listener = view -> {
+                int val = 10;
+                String txt = "10 Minutes";
+                int id = view.getId();
+                if (id == com.example.reminder.R.id.option_5_min) {
+                    val = 5;
+                    txt = "5 Minutes";
+                } else if (id == com.example.reminder.R.id.option_10_min) {
+                    val = 10;
+                    txt = "10 Minutes";
+                } else if (id == com.example.reminder.R.id.option_15_min) {
+                    val = 15;
+                    txt = "15 Minutes";
+                } else if (id == com.example.reminder.R.id.option_30_min) {
+                    val = 30;
+                    txt = "30 Minutes";
+                }
+
+                prefs.edit().putInt(KEY_SNOOZE_DURATION, val).apply();
+                binding.tvSnoozeDuration.setText(txt);
+                popupWindow.dismiss();
+            };
+
+            popupView.findViewById(com.example.reminder.R.id.option_5_min).setOnClickListener(listener);
+            popupView.findViewById(com.example.reminder.R.id.option_10_min).setOnClickListener(listener);
+            popupView.findViewById(com.example.reminder.R.id.option_15_min).setOnClickListener(listener);
+            popupView.findViewById(com.example.reminder.R.id.option_30_min).setOnClickListener(listener);
+
+            // Show under the view
+            popupWindow.showAsDropDown(v, 0, 0);
         });
     }
 

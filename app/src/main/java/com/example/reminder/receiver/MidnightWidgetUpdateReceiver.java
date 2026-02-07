@@ -15,19 +15,15 @@ public class MidnightWidgetUpdateReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        android.util.Log.d("MidnightUpdate", "onReceive: " + intent.getAction());
-
         if (ACTION_MIDNIGHT_UPDATE.equals(intent.getAction())
                 || Intent.ACTION_TIME_CHANGED.equals(intent.getAction())) {
             // Refresh widget to update date/time display
-            android.util.Log.d("MidnightUpdate", "Triggering widget refresh");
             StickyNoteWidgetProvider.sendRefreshBroadcast(context);
 
             // Reschedule for next midnight
             scheduleMidnightUpdate(context);
         } else if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
             // Reschedule after device reboot
-            android.util.Log.d("MidnightUpdate", "Boot completed, scheduling midnight update");
             scheduleMidnightUpdate(context);
         }
     }
@@ -57,8 +53,6 @@ public class MidnightWidgetUpdateReceiver extends BroadcastReceiver {
 
         long triggerTime = midnight.getTimeInMillis();
 
-        android.util.Log.d("MidnightUpdate", "Scheduling widget update at: " + midnight.getTime());
-
         // Use setExactAndAllowWhileIdle for precise midnight updates
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
     }
@@ -77,6 +71,5 @@ public class MidnightWidgetUpdateReceiver extends BroadcastReceiver {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         alarmManager.cancel(pendingIntent);
-        android.util.Log.d("MidnightUpdate", "Cancelled midnight update alarm");
     }
 }

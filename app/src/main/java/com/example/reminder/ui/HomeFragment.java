@@ -42,11 +42,12 @@ public class HomeFragment extends Fragment implements ReminderAdapter.OnItemClic
             if (item.getItemId() == R.id.action_settings) {
                 Navigation.findNavController(requireView()).navigate(R.id.settingsFragment);
                 return true;
-            } else if (item.getItemId() == R.id.action_add_widget) {
-                requestPinWidget();
-                return true;
             } else if (item.getItemId() == R.id.action_calendar) {
                 Navigation.findNavController(requireView()).navigate(R.id.calendarFragment);
+                return true;
+            } else if (item.getItemId() == R.id.action_more_custom) {
+                View menuItemView = requireActivity().findViewById(R.id.action_more_custom);
+                showCustomMenu(menuItemView != null ? menuItemView : binding.toolbar);
                 return true;
             }
             return false;
@@ -169,6 +170,51 @@ public class HomeFragment extends Fragment implements ReminderAdapter.OnItemClic
         adapter = new ReminderAdapter(this);
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recyclerView.setAdapter(adapter);
+
+        androidx.recyclerview.widget.ItemTouchHelper itemTouchHelper = new androidx.recyclerview.widget.ItemTouchHelper(
+                new SwipeCallback(requireContext()) {
+                    @Override
+                    public void onSwiped(@NonNull androidx.recyclerview.widget.RecyclerView.ViewHolder viewHolder,
+                            int direction) {
+                        int position = viewHolder.getAdapterPosition();
+                        Reminder reminder = adapter.getCurrentList().get(position);
+
+                        if (direction == androidx.recyclerview.widget.ItemTouchHelper.LEFT) {
+                            // Delete
+                            viewModel.delete(reminder);
+                            com.google.android.material.snackbar.Snackbar
+                                    .make(binding.getRoot(), "Reminder deleted",
+                                            com.google.android.material.snackbar.Snackbar.LENGTH_LONG)
+                                    .setAction("Undo", v -> viewModel.insert(reminder))
+                                    // can restore or we
+                                    // accept simple delete
+                                    // for now.
+                                    // Actually HomeViewModel doesn't expose save, it exposes delete.
+                                    // Let's just use delete for now, implementing undo properly requires insert in
+                                    // VM.
+                                    // Ideally we should ask for confirmation or allow undo.
+                                    .show();
+
+                        } else if (direction == androidx.recyclerview.widget.ItemTouchHelper.RIGHT) {
+                            // Complete
+                            viewModel.updateCompletionStatus(reminder, !reminder.isCompleted());
+                            // Refresh to show update (or relies on LiveData)
+                            // If we toggle, and it's already completed, it becomes incomplete. Logic is
+                            // fine.
+                            // But typically swipe right is "Mark Complete".
+                            if (!reminder.isCompleted()) {
+                                // Only show snackbar if we actually completed it (positive action)
+                                com.google.android.material.snackbar.Snackbar
+                                        .make(binding.getRoot(), "Reminder completed",
+                                                com.google.android.material.snackbar.Snackbar.LENGTH_SHORT)
+                                        .show();
+                            }
+                            // Reset the swipe state so the item snaps back
+                            adapter.notifyItemChanged(position);
+                        }
+                    }
+                });
+        itemTouchHelper.attachToRecyclerView(binding.recyclerView);
     }
 
     @Override
@@ -277,6 +323,37 @@ public class HomeFragment extends Fragment implements ReminderAdapter.OnItemClic
 
     };
 
+    // Custom Popup Menu for "More" options
+    private void showCustomMenu(View anchor) {
+        android.view.LayoutInflater inflater = getLayoutInflater();
+        View popupView = inflater.inflate(R.layout.popup_menu_home, null);
+
+        // Create PopupWindow
+        final android.widget.PopupWindow popupWindow = new android.widget.PopupWindow(
+                popupView,
+                android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+                android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+                true);
+
+        // Set elevation
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            popupWindow.setElevation(10);
+        }
+
+        // Background for outside touch dismissal (needed for older APIs or consistency)
+        popupWindow
+                .setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+        // Setup Item Clicks
+        popupView.findViewById(R.id.menu_add_widget).setOnClickListener(v -> {
+            requestPinWidget();
+            popupWindow.dismiss();
+        });
+
+        // Show
+        popupWindow.showAsDropDown(anchor, 0, -20); // Offset slightly
+    }
+
     private void requestPinWidget() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             android.appwidget.AppWidgetManager appWidgetManager = requireContext()
@@ -285,6 +362,15 @@ public class HomeFragment extends Fragment implements ReminderAdapter.OnItemClic
                     com.example.reminder.widget.StickyNoteWidgetProvider.class);
 
             if (appWidgetManager.isRequestPinAppWidgetSupported()) {
+                // strict check: if widget already exists, do not ask
+                int[] existingIds = appWidgetManager.getAppWidgetIds(myProvider);
+                if (existingIds != null && existingIds.length > 0) {
+                    com.google.android.material.snackbar.Snackbar.make(binding.getRoot(),
+                            "Widget is already added to your home screen",
+                            com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show();
+                    return;
+                }
+
                 android.content.Intent pinnedWidgetCallbackIntent = new android.content.Intent(requireContext(),
                         com.example.reminder.receiver.AlarmReceiver.class); // Using AlarmReceiver as dummy callback or
                                                                             // null

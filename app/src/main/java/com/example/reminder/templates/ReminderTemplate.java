@@ -10,6 +10,9 @@ public class ReminderTemplate {
     private final String description;
     private final String repeatMode;
     private final long repeatInterval;
+    private final String repeatDays;
+    private final Integer windowStart;
+    private final Integer windowEnd;
     private final List<TimeSlot> suggestedTimes;
     private final TemplateCategory category;
 
@@ -20,6 +23,9 @@ public class ReminderTemplate {
         this.description = builder.description;
         this.repeatMode = builder.repeatMode;
         this.repeatInterval = builder.repeatInterval;
+        this.repeatDays = builder.repeatDays;
+        this.windowStart = builder.windowStart;
+        this.windowEnd = builder.windowEnd;
         this.suggestedTimes = builder.suggestedTimes;
         this.category = builder.category;
     }
@@ -48,9 +54,23 @@ public class ReminderTemplate {
         return repeatInterval;
     }
 
+    public String getRepeatDays() {
+        return repeatDays;
+    }
+
+    public Integer getWindowStart() {
+        return windowStart;
+    }
+
+    public Integer getWindowEnd() {
+        return windowEnd;
+    }
+
     public List<TimeSlot> getSuggestedTimes() {
         return new ArrayList<>(suggestedTimes);
     }
+
+    // ... (keep getFrequencyText)
 
     public TemplateCategory getCategory() {
         return category;
@@ -78,6 +98,9 @@ public class ReminderTemplate {
         private String description;
         private String repeatMode = "DAILY";
         private long repeatInterval = 0;
+        private String repeatDays;
+        private Integer windowStart;
+        private Integer windowEnd;
         private List<TimeSlot> suggestedTimes = new ArrayList<>();
         private TemplateCategory category = TemplateCategory.ALL;
 
@@ -108,6 +131,21 @@ public class ReminderTemplate {
 
         public Builder repeatInterval(long repeatInterval) {
             this.repeatInterval = repeatInterval;
+            return this;
+        }
+
+        public Builder repeatDays(String repeatDays) {
+            this.repeatDays = repeatDays;
+            return this;
+        }
+
+        public Builder windowStart(Integer windowStart) {
+            this.windowStart = windowStart;
+            return this;
+        }
+
+        public Builder windowEnd(Integer windowEnd) {
+            this.windowEnd = windowEnd;
             return this;
         }
 

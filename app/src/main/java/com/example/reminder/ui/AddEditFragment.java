@@ -60,169 +60,216 @@ public class AddEditFragment extends Fragment {
         binding.btnSave.setOnClickListener(v -> saveReminder());
     }
 
-    private void showRepeatOptions() {
-        android.view.LayoutInflater inflater = LayoutInflater.from(requireContext());
-        android.view.View dialogView = inflater.inflate(com.example.reminder.R.layout.dialog_repeat_options, null);
+    // Advanced Repeat State
+    private String repeatDays = null; // "1,2,3,4,5,6,7"
+    private int windowStartC = 480; // 8:00 AM
+    private int windowEndC = 1200; // 8:00 PM
+    private boolean isIntervalMode = false;
 
-        final String[] modes = { "NONE", "HOURLY", "DAILY", "WEEKLY", "MONTHLY", "CUSTOM" };
+    private void showRepeatOptions() {
+        android.view.View dialogView = LayoutInflater.from(requireContext())
+                .inflate(com.example.reminder.R.layout.dialog_repeat_advanced, null);
 
         android.app.AlertDialog dialog = new android.app.AlertDialog.Builder(requireContext())
                 .setView(dialogView)
                 .create();
 
-        // Make background transparent
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         }
 
-        // Set click listeners
-        dialogView.findViewById(com.example.reminder.R.id.option_none).setOnClickListener(v -> {
-            selectedRepeatMode = modes[0];
-            updateRepeatText();
-            dialog.dismiss();
+        // Initialize UI Elements
+        com.google.android.material.chip.ChipGroup chipGroup = dialogView
+                .findViewById(com.example.reminder.R.id.chipGroupDays);
+        android.widget.RadioGroup radioGroup = dialogView.findViewById(com.example.reminder.R.id.radioGroupFrequency);
+        android.widget.LinearLayout layoutInterval = dialogView
+                .findViewById(com.example.reminder.R.id.layoutIntervalOptions);
+        android.widget.EditText etInterval = dialogView.findViewById(com.example.reminder.R.id.etIntervalValue);
+        com.google.android.material.button.MaterialButtonToggleGroup toggleGroupUnit = dialogView
+                .findViewById(com.example.reminder.R.id.toggleGroupUnit);
+        android.widget.TextView tvStart = dialogView.findViewById(com.example.reminder.R.id.tvStartTime);
+        android.widget.TextView tvEnd = dialogView.findViewById(com.example.reminder.R.id.tvEndTime);
+        android.widget.Button btnCancel = dialogView.findViewById(com.example.reminder.R.id.btnCancel);
+        android.widget.Button btnConfirm = dialogView.findViewById(com.example.reminder.R.id.btnConfirm);
+
+        // Load Current State
+        // Days
+        if (repeatDays == null || repeatDays.isEmpty()) {
+            // Default select all
+            for (int i = 0; i < chipGroup.getChildCount(); i++) {
+                ((com.google.android.material.chip.Chip) chipGroup.getChildAt(i)).setChecked(true);
+            }
+        } else {
+            String[] days = repeatDays.split(",");
+            for (String day : days) {
+                int dayId = Integer.parseInt(day);
+                int chipIndex = -1;
+                if (dayId == java.util.Calendar.MONDAY)
+                    chipIndex = 0;
+                else if (dayId == java.util.Calendar.TUESDAY)
+                    chipIndex = 1;
+                else if (dayId == java.util.Calendar.WEDNESDAY)
+                    chipIndex = 2;
+                else if (dayId == java.util.Calendar.THURSDAY)
+                    chipIndex = 3;
+                else if (dayId == java.util.Calendar.FRIDAY)
+                    chipIndex = 4;
+                else if (dayId == java.util.Calendar.SATURDAY)
+                    chipIndex = 5;
+                else if (dayId == java.util.Calendar.SUNDAY)
+                    chipIndex = 6;
+
+                if (chipIndex != -1) {
+                    ((com.google.android.material.chip.Chip) chipGroup.getChildAt(chipIndex)).setChecked(true);
+                }
+            }
+        }
+
+        // Frequency
+        if ("CUSTOM".equals(selectedRepeatMode) && customIntervalMillis > 0) {
+            radioGroup.check(com.example.reminder.R.id.radioInterval);
+            layoutInterval.setVisibility(View.VISIBLE);
+
+            // Calc interval
+            if (customIntervalMillis >= 60 * 60 * 1000) {
+                long hours = customIntervalMillis / (60 * 60 * 1000);
+                etInterval.setText(String.valueOf(hours));
+                toggleGroupUnit.check(com.example.reminder.R.id.btnUnitHours);
+            } else {
+                long mins = customIntervalMillis / (60 * 1000);
+                etInterval.setText(String.valueOf(mins));
+                toggleGroupUnit.check(com.example.reminder.R.id.btnUnitMins);
+            }
+        } else {
+            radioGroup.check(com.example.reminder.R.id.radioOnceDaily);
+            layoutInterval.setVisibility(View.GONE);
+            // Default to hours
+            toggleGroupUnit.check(com.example.reminder.R.id.btnUnitHours);
+        }
+
+        // Window Time
+        updateTimeText(tvStart, windowStartC);
+        updateTimeText(tvEnd, windowEndC);
+
+        // Listeners
+        radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == com.example.reminder.R.id.radioInterval) {
+                layoutInterval.setVisibility(View.VISIBLE);
+            } else {
+                layoutInterval.setVisibility(View.GONE);
+            }
         });
 
-        dialogView.findViewById(com.example.reminder.R.id.option_hourly).setOnClickListener(v -> {
-            selectedRepeatMode = modes[1];
+        tvStart.setOnClickListener(v -> showWindowTimePicker(tvStart, true));
+        tvEnd.setOnClickListener(v -> showWindowTimePicker(tvEnd, false));
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        btnConfirm.setOnClickListener(v -> {
+            // Save State
+            StringBuilder sb = new StringBuilder();
+            boolean first = true;
+            // Iterate chips (0=Mon(2)...6=Sun(1))
+            int[] calendarDays = {
+                    java.util.Calendar.MONDAY, java.util.Calendar.TUESDAY, java.util.Calendar.WEDNESDAY,
+                    java.util.Calendar.THURSDAY, java.util.Calendar.FRIDAY, java.util.Calendar.SATURDAY,
+                    java.util.Calendar.SUNDAY
+            };
+
+            int checkedCount = 0;
+            for (int i = 0; i < 7; i++) {
+                com.google.android.material.chip.Chip chip = (com.google.android.material.chip.Chip) chipGroup
+                        .getChildAt(i);
+                if (chip.isChecked()) {
+                    if (!first)
+                        sb.append(",");
+                    sb.append(calendarDays[i]);
+                    first = false;
+                    checkedCount++;
+                }
+            }
+            repeatDays = sb.toString();
+
+            if (checkedCount == 0) {
+                Toast.makeText(requireContext(), "Please select at least one day", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (radioGroup.getCheckedRadioButtonId() == com.example.reminder.R.id.radioInterval) {
+                selectedRepeatMode = "CUSTOM"; // Using "CUSTOM" to denote detailed interval
+                try {
+                    long val = Long.parseLong(etInterval.getText().toString());
+                    if (toggleGroupUnit.getCheckedButtonId() == com.example.reminder.R.id.btnUnitHours) { // Hours
+                        customIntervalMillis = val * 60 * 60 * 1000L;
+                    } else { // Minutes
+                        customIntervalMillis = val * 60 * 1000L;
+                    }
+                } catch (NumberFormatException e) {
+                    customIntervalMillis = 60 * 60 * 1000L; // Default 1 hour
+                }
+            } else {
+                selectedRepeatMode = "DAILY"; // Standard daily check
+                customIntervalMillis = 0;
+            }
+
             updateRepeatText();
             dialog.dismiss();
-        });
-
-        dialogView.findViewById(com.example.reminder.R.id.option_daily).setOnClickListener(v -> {
-            selectedRepeatMode = modes[2];
-            updateRepeatText();
-            dialog.dismiss();
-        });
-
-        dialogView.findViewById(com.example.reminder.R.id.option_weekly).setOnClickListener(v -> {
-            selectedRepeatMode = modes[3];
-            updateRepeatText();
-            dialog.dismiss();
-        });
-
-        dialogView.findViewById(com.example.reminder.R.id.option_monthly).setOnClickListener(v -> {
-            selectedRepeatMode = modes[4];
-            updateRepeatText();
-            dialog.dismiss();
-        });
-
-        dialogView.findViewById(com.example.reminder.R.id.option_custom).setOnClickListener(v -> {
-            dialog.dismiss();
-            showCustomRepeatDialog();
         });
 
         dialog.show();
     }
 
-    private void showCustomRepeatDialog() {
-        android.view.LayoutInflater inflater = LayoutInflater.from(requireContext());
-        android.view.View dialogView = inflater.inflate(com.example.reminder.R.layout.dialog_interval_options, null);
-        android.widget.LinearLayout container = dialogView
-                .findViewById(com.example.reminder.R.id.interval_options_container);
+    private void showWindowTimePicker(android.widget.TextView tv, boolean isStart) {
+        int initialMinutes = isStart ? windowStartC : windowEndC;
+        int hour = initialMinutes / 60;
+        int minute = initialMinutes % 60;
 
-        final java.util.List<String> labels = new java.util.ArrayList<>();
-        final java.util.List<Long> values = new java.util.ArrayList<>();
+        com.google.android.material.timepicker.MaterialTimePicker picker = new com.google.android.material.timepicker.MaterialTimePicker.Builder()
+                .setTimeFormat(com.google.android.material.timepicker.TimeFormat.CLOCK_12H)
+                .setHour(hour)
+                .setMinute(minute)
+                .setTitleText(isStart ? "Window Start" : "Window End")
+                .build();
 
-        // 1 to 5 minutes
-        for (int i = 1; i <= 5; i++) {
-            labels.add(i + " Minute" + (i > 1 ? "s" : ""));
-            values.add(i * 60 * 1000L);
-        }
+        picker.addOnPositiveButtonClickListener(v -> {
+            int mins = picker.getHour() * 60 + picker.getMinute();
+            if (isStart)
+                windowStartC = mins;
+            else
+                windowEndC = mins;
+            updateTimeText(tv, mins);
+        });
 
-        // 15 minute intervals up to 2 hours
-        labels.add("15 Minutes");
-        values.add(15 * 60 * 1000L);
-        labels.add("30 Minutes");
-        values.add(30 * 60 * 1000L);
-        labels.add("45 Minutes");
-        values.add(45 * 60 * 1000L);
-        labels.add("1 Hour");
-        values.add(60 * 60 * 1000L);
+        picker.show(getParentFragmentManager(), "WINDOW_TIME_PICKER");
+    }
 
-        // Larger intervals
-        labels.add("1.5 Hours");
-        values.add(90 * 60 * 1000L);
-        labels.add("2 Hours");
-        values.add(120 * 60 * 1000L);
-        labels.add("3 Hours");
-        values.add(180 * 60 * 1000L);
-        labels.add("4 Hours");
-        values.add(240 * 60 * 1000L);
-        labels.add("6 Hours");
-        values.add(360 * 60 * 1000L);
-        labels.add("8 Hours");
-        values.add(480 * 60 * 1000L);
-        labels.add("12 Hours");
-        values.add(720 * 60 * 1000L);
-        labels.add("24 Hours");
-        values.add(24 * 60 * 60 * 1000L);
-
-        com.google.android.material.bottomsheet.BottomSheetDialog dialog = new com.google.android.material.bottomsheet.BottomSheetDialog(
-                requireContext());
-        dialog.setContentView(dialogView);
-
-        // Make background transparent
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-        }
-
-        // Configure bottom sheet behavior for swipe-to-dismiss
-        dialog.getBehavior().setDraggable(true);
-        dialog.getBehavior().setPeekHeight(350 * (int) getResources().getDisplayMetrics().density);
-        dialog.getBehavior().setHideable(true);
-
-        // Dynamically add options
-        for (int i = 0; i < labels.size(); i++) {
-            final int index = i;
-            android.widget.TextView option = new android.widget.TextView(requireContext());
-            option.setText(labels.get(i));
-            option.setTextColor(getResources().getColor(com.example.reminder.R.color.text_primary, null));
-            option.setTextSize(16);
-            int padding = (int) (16 * getResources().getDisplayMetrics().density);
-            option.setPadding(padding, padding, padding, padding);
-
-            // Set ripple background using TypedValue
-            android.util.TypedValue outValue = new android.util.TypedValue();
-            requireContext().getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
-            option.setBackgroundResource(outValue.resourceId);
-
-            option.setClickable(true);
-            option.setFocusable(true);
-
-            option.setOnClickListener(v -> {
-                selectedRepeatMode = "CUSTOM";
-                customIntervalMillis = values.get(index);
-                updateRepeatText();
-                dialog.dismiss();
-            });
-
-            container.addView(option);
-        }
-
-        dialog.show();
+    private void updateTimeText(android.widget.TextView tv, int minutesFromMidnight) {
+        int h = minutesFromMidnight / 60;
+        int m = minutesFromMidnight % 60;
+        java.util.Calendar c = java.util.Calendar.getInstance();
+        c.set(java.util.Calendar.HOUR_OF_DAY, h);
+        c.set(java.util.Calendar.MINUTE, m);
+        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+        tv.setText(sdf.format(c.getTime()));
     }
 
     private void updateRepeatText() {
-        switch (selectedRepeatMode) {
-            case "HOURLY":
-                binding.tvRepeat.setText("Every Hour");
-                break;
-            case "DAILY":
-                binding.tvRepeat.setText("Every Day");
-                break;
-            case "WEEKLY":
-                binding.tvRepeat.setText("Every Week");
-                break;
-            case "MONTHLY":
-                binding.tvRepeat.setText("Every Month");
-                break;
-            case "CUSTOM":
-                long minutes = customIntervalMillis / (60 * 1000);
-                binding.tvRepeat.setText("Every " + minutes + " minutes");
-                break;
-            default:
-                binding.tvRepeat.setText("Does not repeat");
-                break;
+        if (repeatDays == null || repeatDays.isEmpty()) {
+            binding.tvRepeat.setText("Does not repeat");
+            return;
+        }
+
+        String[] days = repeatDays.split(",");
+        String dayText = (days.length == 7) ? "Every Day" : days.length + " Days/Week";
+
+        if ("CUSTOM".equals(selectedRepeatMode)) {
+            long min = customIntervalMillis / (60 * 1000);
+            String intervalText = (min >= 60) ? (min / 60) + " Hours" : min + " Mins";
+            binding.tvRepeat.setText(dayText + ", Every " + intervalText);
+        } else if ("DAILY".equals(selectedRepeatMode)) {
+            binding.tvRepeat.setText(dayText + " (Once)");
+        } else {
+            binding.tvRepeat.setText("Does not repeat");
         }
     }
 
@@ -234,6 +281,17 @@ public class AddEditFragment extends Fragment {
         selectedRepeatMode = reminder.getRepeatMode();
         if (selectedRepeatMode == null)
             selectedRepeatMode = "NONE";
+
+        // Load Advanced Options
+        repeatDays = reminder.getRepeatDays();
+        if ((repeatDays == null || repeatDays.isEmpty()) && "DAILY".equals(selectedRepeatMode)) {
+            repeatDays = "1,2,3,4,5,6,7";
+        }
+
+        if (reminder.getWindowStart() != null)
+            windowStartC = reminder.getWindowStart();
+        if (reminder.getWindowEnd() != null)
+            windowEndC = reminder.getWindowEnd();
 
         if ("CUSTOM".equals(selectedRepeatMode)) {
             customIntervalMillis = reminder.getRepeatInterval();
@@ -261,7 +319,7 @@ public class AddEditFragment extends Fragment {
         int minute = calendar.get(Calendar.MINUTE);
 
         com.google.android.material.timepicker.MaterialTimePicker timePicker = new com.google.android.material.timepicker.MaterialTimePicker.Builder()
-                .setTimeFormat(DateFormat.is24HourFormat(requireContext())
+                .setTimeFormat(android.text.format.DateFormat.is24HourFormat(requireContext())
                         ? com.google.android.material.timepicker.TimeFormat.CLOCK_24H
                         : com.google.android.material.timepicker.TimeFormat.CLOCK_12H)
                 .setHour(hour)
@@ -298,9 +356,10 @@ public class AddEditFragment extends Fragment {
             return;
         }
 
-        if (calendar.getTimeInMillis() <= System.currentTimeMillis()) {
-            Toast.makeText(getContext(), "Please select a future time", Toast.LENGTH_SHORT).show();
-            // Allow saving anyway
+        // Allow saving past times if it's a repeating reminder (it will confirm next
+        // occurrence)
+        if (calendar.getTimeInMillis() <= System.currentTimeMillis() && "NONE".equals(selectedRepeatMode)) {
+            // Optional: warn user
         }
 
         Reminder reminder;
@@ -312,9 +371,19 @@ public class AddEditFragment extends Fragment {
             reminder.setAllDay(binding.switchAllDay.isChecked());
             reminder.setRepeatMode(selectedRepeatMode);
             reminder.setRepeatInterval(customIntervalMillis);
+            // Advanced
+            reminder.setRepeatDays(repeatDays);
+            reminder.setWindowStart(windowStartC);
+            reminder.setWindowEnd(windowEndC);
         } else {
             reminder = new Reminder(title, description, calendar.getTimeInMillis(),
                     binding.switchAllDay.isChecked(), selectedRepeatMode, customIntervalMillis, 0);
+            // Advanced setters
+            reminder.setRepeatDays(repeatDays);
+            reminder.setWindowStart(windowStartC);
+            reminder.setWindowEnd(windowEndC);
+            // Default custom reminders to show on widget
+            reminder.setHideFromWidget(false);
         }
 
         viewModel.saveReminder(reminder);
@@ -324,44 +393,55 @@ public class AddEditFragment extends Fragment {
     }
 
     private void checkAndPromptForWidget() {
-        android.appwidget.AppWidgetManager appWidgetManager = android.appwidget.AppWidgetManager
-                .getInstance(requireContext());
-        android.content.ComponentName myProvider = new android.content.ComponentName(requireContext(),
-                com.example.reminder.widget.StickyNoteWidgetProvider.class);
-        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(myProvider);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            android.appwidget.AppWidgetManager appWidgetManager = android.appwidget.AppWidgetManager
+                    .getInstance(requireContext());
+            android.content.ComponentName myProvider = new android.content.ComponentName(requireContext(),
+                    com.example.reminder.widget.StickyNoteWidgetProvider.class);
 
-        if (appWidgetIds.length == 0 && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O
-                && appWidgetManager.isRequestPinAppWidgetSupported()) {
-
-            android.view.LayoutInflater inflater = LayoutInflater.from(requireContext());
-            android.view.View dialogView = inflater.inflate(com.example.reminder.R.layout.dialog_add_widget, null);
-
-            android.app.AlertDialog dialog = new android.app.AlertDialog.Builder(requireContext())
-                    .setView(dialogView)
-                    .setCancelable(false)
-                    .create();
-
-            // Make background transparent
-            if (dialog.getWindow() != null) {
-                dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            if (appWidgetManager.isRequestPinAppWidgetSupported()) {
+                // Check if we already have widgets pinned
+                int[] existingIds = appWidgetManager.getAppWidgetIds(myProvider);
+                if (existingIds != null && existingIds.length > 0) {
+                    // Widget exists, don't pester user
+                    Navigation.findNavController(requireView()).navigateUp();
+                } else {
+                    // No widget, offer to add one
+                    showAddWidgetDialog();
+                }
+            } else {
+                Navigation.findNavController(requireView()).navigateUp();
             }
-
-            // Set button click listeners
-            dialogView.findViewById(com.example.reminder.R.id.btnAddWidget).setOnClickListener(v -> {
-                requestPinWidget();
-                Navigation.findNavController(requireView()).navigateUp();
-                dialog.dismiss();
-            });
-
-            dialogView.findViewById(com.example.reminder.R.id.btnNoThanks).setOnClickListener(v -> {
-                Navigation.findNavController(requireView()).navigateUp();
-                dialog.dismiss();
-            });
-
-            dialog.show();
         } else {
             Navigation.findNavController(requireView()).navigateUp();
         }
+    }
+
+    private void showAddWidgetDialog() {
+        android.view.View dialogView = LayoutInflater.from(requireContext())
+                .inflate(com.example.reminder.R.layout.dialog_add_widget, null);
+
+        android.app.AlertDialog dialog = new android.app.AlertDialog.Builder(requireContext())
+                .setView(dialogView)
+                .setCancelable(false)
+                .create();
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        dialogView.findViewById(com.example.reminder.R.id.btnAddWidget).setOnClickListener(v -> {
+            requestPinWidget();
+            Navigation.findNavController(requireView()).navigateUp();
+            dialog.dismiss();
+        });
+
+        dialogView.findViewById(com.example.reminder.R.id.btnNoThanks).setOnClickListener(v -> {
+            Navigation.findNavController(requireView()).navigateUp();
+            dialog.dismiss();
+        });
+
+        dialog.show();
     }
 
     private void requestPinWidget() {
@@ -372,8 +452,6 @@ public class AddEditFragment extends Fragment {
                     com.example.reminder.widget.StickyNoteWidgetProvider.class);
 
             if (appWidgetManager.isRequestPinAppWidgetSupported()) {
-                // Using null intent for simplicity as we don't need a specific callback action
-                // yet
                 appWidgetManager.requestPinAppWidget(myProvider, null, null);
             }
         }

@@ -28,20 +28,22 @@ public class HomeViewModel extends ViewModel {
         return allReminders;
     }
 
+    public void insert(Reminder reminder) {
+        repository.insert(reminder);
+        com.example.reminder.widget.StickyNoteWidgetProvider.sendRefreshBroadcast(context);
+    }
+
     public void delete(Reminder reminder) {
-        android.util.Log.d("HomeViewModel", "Deleting reminder: " + reminder.getId());
         repository.delete(reminder);
         com.example.reminder.widget.StickyNoteWidgetProvider.sendRefreshBroadcast(context);
     }
 
     public void delete(List<Reminder> reminders) {
-        android.util.Log.d("HomeViewModel", "Deleting batch: " + reminders.size());
         repository.delete(reminders);
         com.example.reminder.widget.StickyNoteWidgetProvider.sendRefreshBroadcast(context);
     }
 
     public void updateCompletionStatus(Reminder reminder, boolean isCompleted) {
-        android.util.Log.d("HomeViewModel", "Updating completion status: " + reminder.getId() + " to " + isCompleted);
         reminder.setCompleted(isCompleted);
         repository.update(reminder);
         com.example.reminder.widget.StickyNoteWidgetProvider.sendRefreshBroadcast(context);

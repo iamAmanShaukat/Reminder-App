@@ -13,7 +13,8 @@
         app:iconTint="@null"
         app:showAsAction="ifRoom" />
     <item
-        android:id="@+id/action_add_widget"
-        android:title="Add Widget to Home"
-        app:showAsAction="never" />
+        android:id="@+id/action_more_custom"
+        android:icon="@drawable/ic_more_vert"
+        android:title="More"
+        app:showAsAction="always" />
 </menu>

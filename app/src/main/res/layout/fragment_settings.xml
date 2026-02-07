@@ -16,57 +16,122 @@
         android:textColor="@color/text_primary"
         android:layout_marginBottom="24dp" />
 
-    <!-- Snooze Duration -->
+    <!-- Preferences Card -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@drawable/bg_card"
-        android:padding="16dp"
         android:layout_marginBottom="16dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Default Snooze Duration"
-            android:textColor="@color/text_secondary"
-            android:textSize="14sp" />
-
-        <Spinner
-            android:id="@+id/spinnerSnooze"
+        <!-- Snooze Duration -->
+        <LinearLayout
+            android:id="@+id/containerSnooze"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:minHeight="48dp" />
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Default Snooze Duration"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tvSnoozeDuration"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="10 Minutes"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
+                android:layout_marginTop="8dp" />
+        </LinearLayout>
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/glass_stroke"
+            android:layout_marginHorizontal="16dp"/>
+
+        <!-- Notification Sound -->
+        <LinearLayout
+            android:id="@+id/containerSound"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Notification Sound"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tvSoundName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Default"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
+                android:layout_marginTop="8dp" />
+        </LinearLayout>
     </LinearLayout>
 
-    <!-- Notification Sound -->
+    <!-- Help & Support -->
     <LinearLayout
-        android:id="@+id/containerSound"
+        android:id="@+id/containerHelp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@drawable/bg_card"
         android:padding="16dp"
+        android:layout_marginBottom="16dp"
         android:clickable="true"
         android:focusable="true"
-        android:layout_marginBottom="16dp">
+        android:foreground="?attr/selectableItemBackground">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+             <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="How to Use"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+           <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_chevron_right"
+                app:tint="@color/text_tertiary"/>
+                
+        </LinearLayout>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Notification Sound"
+            android:text="Gestures, Widgets, and Tips"
             android:textColor="@color/text_secondary"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            android:layout_marginTop="4dp" />
 
-        <TextView
-            android:id="@+id/tvSoundName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Default"
-            android:textColor="@color/text_primary"
-            android:textSize="16sp"
-            android:layout_marginTop="8dp" />
     </LinearLayout>
 
     <!-- Google Drive Backup -->
