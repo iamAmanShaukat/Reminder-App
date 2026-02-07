@@ -42,4 +42,7 @@ public interface ReminderDao {
 
     @Query("SELECT * FROM reminders WHERE isCompleted = 0 ORDER BY timeMillis ASC")
     List<Reminder> getActiveRemindersSync();
+
+    @Query("SELECT * FROM reminders WHERE isCompleted = 0 AND hideFromWidget = 0 ORDER BY timeMillis ASC")
+    List<Reminder> getWidgetRemindersSync();
 }

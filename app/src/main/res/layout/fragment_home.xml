@@ -28,6 +28,97 @@
         android:paddingBottom="88dp"
         android:clipToPadding="false" />
 
+    <!-- Scrim/Overlay for dimming background when FAB is expanded -->
+    <View
+        android:id="@+id/fabScrim"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80000000"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true" />
+
+    <!-- Mini FAB: Templates (appears above custom FAB) -->
+    <LinearLayout
+        android:id="@+id/fabTemplatesLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="240dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:visibility="gone"
+        android:alpha="0">
+
+        <TextView
+            android:id="@+id/fabTemplatesLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Quick Templates"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:background="@drawable/bg_card_glass"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:layout_marginEnd="12dp"
+            android:elevation="4dp" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabTemplates"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_water_glass"
+            android:contentDescription="Quick Templates"
+            app:fabSize="mini"
+            app:backgroundTint="@color/brand_accent"
+            app:tint="@color/white" />
+
+    </LinearLayout>
+
+    <!-- Mini FAB: Custom Reminder (appears above main FAB) -->
+    <LinearLayout
+        android:id="@+id/fabCustomLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="168dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:visibility="gone"
+        android:alpha="0">
+
+        <TextView
+            android:id="@+id/fabCustomLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Custom Reminder"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:background="@drawable/bg_card_glass"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:layout_marginEnd="12dp"
+            android:elevation="4dp" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabCustom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_menu_edit"
+            android:contentDescription="Custom Reminder"
+            app:fabSize="mini"
+            app:backgroundTint="@color/brand_accent"
+            app:tint="@color/white" />
+
+    </LinearLayout>
+
+    <!-- Main FAB -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAdd"
         android:layout_width="wrap_content"

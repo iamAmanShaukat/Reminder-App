@@ -21,6 +21,7 @@
     <color name="text_primary">#FFFFFF</color>
     <color name="text_secondary">#AEAEB2</color>
     <color name="text_tertiary">#636366</color>
+    <color name="text_on_accent">#FFFFFF</color>
 
     <!-- Semantic -->
     <color name="color_delete">#FF453A</color> <!-- Apple Red -->

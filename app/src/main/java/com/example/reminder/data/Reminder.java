@@ -99,6 +99,7 @@ public class Reminder implements Serializable {
     }
 
     private long repeatInterval; // Custom interval in milliseconds
+    private boolean hideFromWidget; // If true, this reminder won't appear on the widget
 
     public long getRepeatInterval() {
         return repeatInterval;
@@ -106,5 +107,13 @@ public class Reminder implements Serializable {
 
     public void setRepeatInterval(long repeatInterval) {
         this.repeatInterval = repeatInterval;
+    }
+
+    public boolean isHideFromWidget() {
+        return hideFromWidget;
+    }
+
+    public void setHideFromWidget(boolean hideFromWidget) {
+        this.hideFromWidget = hideFromWidget;
     }
 }

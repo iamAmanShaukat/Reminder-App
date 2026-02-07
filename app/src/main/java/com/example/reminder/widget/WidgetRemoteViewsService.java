@@ -37,6 +37,7 @@ class ReminderRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactor
         // RemoteViewsServiceFactory
         // Enable WAL to prevent locking with Main App
         database = Room.databaseBuilder(context, AppDatabase.class, "reminder_database")
+                .addMigrations(AppDatabase.MIGRATION_2_3)
                 .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
                 .build();
     }
@@ -54,12 +55,13 @@ class ReminderRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactor
             if (database == null) {
                 android.util.Log.e("WidgetService", "Database is null in onDataSetChanged! Recreating...");
                 database = Room.databaseBuilder(context, AppDatabase.class, "reminder_database")
+                        .addMigrations(AppDatabase.MIGRATION_2_3)
                         .fallbackToDestructiveMigration() // Handle version update
                         .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
                         .build();
             }
 
-            reminders = database.reminderDao().getActiveRemindersSync();
+            reminders = database.reminderDao().getWidgetRemindersSync();
             android.util.Log.d("WidgetService",
                     "onDataSetChanged: Data fetched. Count: " + (reminders != null ? reminders.size() : "null"));
 
@@ -108,7 +110,7 @@ class ReminderRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactor
 
             rv.setTextViewText(R.id.widget_item_title, reminder.getTitle());
 
-            // Date Logic
+            // Date Logic: Today = time only, Other days = date only
             java.util.Calendar now = java.util.Calendar.getInstance();
             java.util.Calendar target = java.util.Calendar.getInstance();
             target.setTimeInMillis(reminder.getTimeMillis());
@@ -118,10 +120,12 @@ class ReminderRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactor
 
             String timeText;
             if (isToday) {
+                // Today: Show only time
                 SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
                 timeText = sdf.format(new Date(reminder.getTimeMillis()));
             } else {
-                SimpleDateFormat sdf = new SimpleDateFormat("MMM d, HH:mm", Locale.getDefault());
+                // Other days: Show only date
+                SimpleDateFormat sdf = new SimpleDateFormat("MMM d", Locale.getDefault());
                 timeText = sdf.format(new Date(reminder.getTimeMillis()));
             }
 
@@ -136,13 +140,9 @@ class ReminderRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactor
             today.set(java.util.Calendar.MILLISECOND, 0);
 
             if (reminder.getTimeMillis() < today.getTimeInMillis() && !reminder.isCompleted()) {
-                // Overdue!
-                rv.setInt(R.id.widget_item_container, "setBackgroundResource", R.drawable.bg_card_overdue);
-                rv.setTextColor(R.id.widget_item_time, context.getColor(R.color.brand_accent));
-
-                // Also append date if overdue
-                SimpleDateFormat dateSdf = new SimpleDateFormat("MMM d, HH:mm", Locale.getDefault());
-                rv.setTextViewText(R.id.widget_item_time, dateSdf.format(new Date(reminder.getTimeMillis())));
+                // Overdue - red time text only
+                rv.setInt(R.id.widget_item_container, "setBackgroundResource", R.drawable.bg_card_glass);
+                rv.setTextColor(R.id.widget_item_time, context.getColor(R.color.color_delete)); // Red for overdue
             } else {
                 // Normal
                 rv.setInt(R.id.widget_item_container, "setBackgroundResource", R.drawable.bg_card_glass);

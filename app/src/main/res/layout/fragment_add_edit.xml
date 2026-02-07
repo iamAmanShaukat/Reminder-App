@@ -202,41 +202,50 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp" 
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
+            android:orientation="vertical"
             android:background="@drawable/bg_card_glass"
             android:paddingHorizontal="20dp"
             android:paddingVertical="12dp"
+            android:clickable="true"
+            android:focusable="true"
             app:layout_constraintTop_toBottomOf="@id/containerAllDay">
             
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@android:drawable/ic_menu_rotate"
-                app:tint="@color/brand_accent"
-                android:layout_marginEnd="16dp"
-                android:contentDescription="Repeat Icon"/>
-
-            <TextView
-                android:layout_width="0dp"
+            <!-- Top row: Icon + Label -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Repeat"
-                android:textColor="@color/text_primary"
-                android:textSize="16sp"
-                android:textStyle="bold"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@android:drawable/ic_menu_rotate"
+                    app:tint="@color/brand_accent"
+                    android:layout_marginEnd="12dp"
+                    android:contentDescription="Repeat Icon"/>
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Repeat"
+                    android:textColor="@color/text_tertiary"
+                    android:textSize="12sp"
+                    android:textAllCaps="true"
+                    android:letterSpacing="0.05"/>
+            </LinearLayout>
+
+            <!-- Value text below -->
             <TextView
                 android:id="@+id/tvRepeat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:layout_marginStart="32dp"
                 android:text="Does not repeat"
-                android:textColor="@color/text_secondary"
-                android:textSize="14sp"
-                android:padding="8dp"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"/>
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold"/>
         </LinearLayout>
         
         <!-- Save Button (Bottom) -->

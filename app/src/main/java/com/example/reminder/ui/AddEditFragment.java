@@ -61,26 +61,64 @@ public class AddEditFragment extends Fragment {
     }
 
     private void showRepeatOptions() {
-        String[] options = { "Does not repeat", "Every Hour", "Every Day", "Every Week", "Every Month",
-                "Custom (Minutes)" };
+        android.view.LayoutInflater inflater = LayoutInflater.from(requireContext());
+        android.view.View dialogView = inflater.inflate(com.example.reminder.R.layout.dialog_repeat_options, null);
+
         final String[] modes = { "NONE", "HOURLY", "DAILY", "WEEKLY", "MONTHLY", "CUSTOM" };
 
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Repeat")
-                .setItems(options, (dialog, which) -> {
-                    String mode = modes[which];
-                    if ("CUSTOM".equals(mode)) {
-                        showCustomRepeatDialog();
-                    } else {
-                        selectedRepeatMode = mode;
-                        updateRepeatText();
-                    }
-                })
-                .show();
+        android.app.AlertDialog dialog = new android.app.AlertDialog.Builder(requireContext())
+                .setView(dialogView)
+                .create();
+
+        // Make background transparent
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        // Set click listeners
+        dialogView.findViewById(com.example.reminder.R.id.option_none).setOnClickListener(v -> {
+            selectedRepeatMode = modes[0];
+            updateRepeatText();
+            dialog.dismiss();
+        });
+
+        dialogView.findViewById(com.example.reminder.R.id.option_hourly).setOnClickListener(v -> {
+            selectedRepeatMode = modes[1];
+            updateRepeatText();
+            dialog.dismiss();
+        });
+
+        dialogView.findViewById(com.example.reminder.R.id.option_daily).setOnClickListener(v -> {
+            selectedRepeatMode = modes[2];
+            updateRepeatText();
+            dialog.dismiss();
+        });
+
+        dialogView.findViewById(com.example.reminder.R.id.option_weekly).setOnClickListener(v -> {
+            selectedRepeatMode = modes[3];
+            updateRepeatText();
+            dialog.dismiss();
+        });
+
+        dialogView.findViewById(com.example.reminder.R.id.option_monthly).setOnClickListener(v -> {
+            selectedRepeatMode = modes[4];
+            updateRepeatText();
+            dialog.dismiss();
+        });
+
+        dialogView.findViewById(com.example.reminder.R.id.option_custom).setOnClickListener(v -> {
+            dialog.dismiss();
+            showCustomRepeatDialog();
+        });
+
+        dialog.show();
     }
 
     private void showCustomRepeatDialog() {
-        final android.widget.Spinner spinner = new android.widget.Spinner(requireContext());
+        android.view.LayoutInflater inflater = LayoutInflater.from(requireContext());
+        android.view.View dialogView = inflater.inflate(com.example.reminder.R.layout.dialog_interval_options, null);
+        android.widget.LinearLayout container = dialogView
+                .findViewById(com.example.reminder.R.id.interval_options_container);
 
         final java.util.List<String> labels = new java.util.ArrayList<>();
         final java.util.List<Long> values = new java.util.ArrayList<>();
@@ -119,28 +157,49 @@ public class AddEditFragment extends Fragment {
         labels.add("24 Hours");
         values.add(24 * 60 * 60 * 1000L);
 
-        android.widget.ArrayAdapter<String> adapter = new android.widget.ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_spinner_item, labels);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
+        com.google.android.material.bottomsheet.BottomSheetDialog dialog = new com.google.android.material.bottomsheet.BottomSheetDialog(
+                requireContext());
+        dialog.setContentView(dialogView);
 
-        // Add some padding
-        int padding = (int) (16 * getResources().getDisplayMetrics().density);
-        spinner.setPadding(padding, padding, padding, padding);
+        // Make background transparent
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
 
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Select Interval")
-                .setView(spinner)
-                .setPositiveButton("Set", (dialog, which) -> {
-                    int selectedPosition = spinner.getSelectedItemPosition();
-                    if (selectedPosition >= 0 && selectedPosition < values.size()) {
-                        selectedRepeatMode = "CUSTOM";
-                        customIntervalMillis = values.get(selectedPosition);
-                        updateRepeatText();
-                    }
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
+        // Configure bottom sheet behavior for swipe-to-dismiss
+        dialog.getBehavior().setDraggable(true);
+        dialog.getBehavior().setPeekHeight(350 * (int) getResources().getDisplayMetrics().density);
+        dialog.getBehavior().setHideable(true);
+
+        // Dynamically add options
+        for (int i = 0; i < labels.size(); i++) {
+            final int index = i;
+            android.widget.TextView option = new android.widget.TextView(requireContext());
+            option.setText(labels.get(i));
+            option.setTextColor(getResources().getColor(com.example.reminder.R.color.text_primary, null));
+            option.setTextSize(16);
+            int padding = (int) (16 * getResources().getDisplayMetrics().density);
+            option.setPadding(padding, padding, padding, padding);
+
+            // Set ripple background using TypedValue
+            android.util.TypedValue outValue = new android.util.TypedValue();
+            requireContext().getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
+            option.setBackgroundResource(outValue.resourceId);
+
+            option.setClickable(true);
+            option.setFocusable(true);
+
+            option.setOnClickListener(v -> {
+                selectedRepeatMode = "CUSTOM";
+                customIntervalMillis = values.get(index);
+                updateRepeatText();
+                dialog.dismiss();
+            });
+
+            container.addView(option);
+        }
+
+        dialog.show();
     }
 
     private void updateRepeatText() {
@@ -183,32 +242,41 @@ public class AddEditFragment extends Fragment {
     }
 
     private void showDatePicker() {
-        DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(),
-                (view, year, month, dayOfMonth) -> {
-                    calendar.set(Calendar.YEAR, year);
-                    calendar.set(Calendar.MONTH, month);
-                    calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                    updateDateButton();
-                },
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH));
-        datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
-        datePickerDialog.show();
+        com.google.android.material.datepicker.MaterialDatePicker<Long> datePicker = com.google.android.material.datepicker.MaterialDatePicker.Builder
+                .datePicker()
+                .setTitleText("Select Date")
+                .setSelection(calendar.getTimeInMillis())
+                .build();
+
+        datePicker.addOnPositiveButtonClickListener(selection -> {
+            calendar.setTimeInMillis(selection);
+            updateDateButton();
+        });
+
+        datePicker.show(getParentFragmentManager(), "DATE_PICKER");
     }
 
     private void showTimePicker() {
-        TimePickerDialog timePickerDialog = new TimePickerDialog(requireContext(),
-                (view, hourOfDay, minute) -> {
-                    calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                    calendar.set(Calendar.MINUTE, minute);
-                    calendar.set(Calendar.SECOND, 0);
-                    updateTimeButton();
-                },
-                calendar.get(Calendar.HOUR_OF_DAY),
-                calendar.get(Calendar.MINUTE),
-                DateFormat.is24HourFormat(requireContext()));
-        timePickerDialog.show();
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        int minute = calendar.get(Calendar.MINUTE);
+
+        com.google.android.material.timepicker.MaterialTimePicker timePicker = new com.google.android.material.timepicker.MaterialTimePicker.Builder()
+                .setTimeFormat(DateFormat.is24HourFormat(requireContext())
+                        ? com.google.android.material.timepicker.TimeFormat.CLOCK_24H
+                        : com.google.android.material.timepicker.TimeFormat.CLOCK_12H)
+                .setHour(hour)
+                .setMinute(minute)
+                .setTitleText("Select Time")
+                .build();
+
+        timePicker.addOnPositiveButtonClickListener(v -> {
+            calendar.set(Calendar.HOUR_OF_DAY, timePicker.getHour());
+            calendar.set(Calendar.MINUTE, timePicker.getMinute());
+            calendar.set(Calendar.SECOND, 0);
+            updateTimeButton();
+        });
+
+        timePicker.show(getParentFragmentManager(), "TIME_PICKER");
     }
 
     private void updateDateButton() {
@@ -264,18 +332,33 @@ public class AddEditFragment extends Fragment {
 
         if (appWidgetIds.length == 0 && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O
                 && appWidgetManager.isRequestPinAppWidgetSupported()) {
-            new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("Add Widget?")
-                    .setMessage("Keep your reminders visible! Would you like to add a widget to your home screen?")
-                    .setPositiveButton("Add Widget", (dialog, which) -> {
-                        requestPinWidget();
-                        Navigation.findNavController(requireView()).navigateUp();
-                    })
-                    .setNegativeButton("No Thanks", (dialog, which) -> {
-                        Navigation.findNavController(requireView()).navigateUp();
-                    })
+
+            android.view.LayoutInflater inflater = LayoutInflater.from(requireContext());
+            android.view.View dialogView = inflater.inflate(com.example.reminder.R.layout.dialog_add_widget, null);
+
+            android.app.AlertDialog dialog = new android.app.AlertDialog.Builder(requireContext())
+                    .setView(dialogView)
                     .setCancelable(false)
-                    .show();
+                    .create();
+
+            // Make background transparent
+            if (dialog.getWindow() != null) {
+                dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            }
+
+            // Set button click listeners
+            dialogView.findViewById(com.example.reminder.R.id.btnAddWidget).setOnClickListener(v -> {
+                requestPinWidget();
+                Navigation.findNavController(requireView()).navigateUp();
+                dialog.dismiss();
+            });
+
+            dialogView.findViewById(com.example.reminder.R.id.btnNoThanks).setOnClickListener(v -> {
+                Navigation.findNavController(requireView()).navigateUp();
+                dialog.dismiss();
+            });
+
+            dialog.show();
         } else {
             Navigation.findNavController(requireView()).navigateUp();
         }

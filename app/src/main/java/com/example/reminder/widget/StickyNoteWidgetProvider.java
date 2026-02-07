@@ -34,12 +34,16 @@ public class StickyNoteWidgetProvider extends AppWidgetProvider {
     public void onEnabled(Context context) {
         android.util.Log.d("StickyWidget", "onEnabled");
         super.onEnabled(context);
+        // Schedule midnight updates when first widget is added
+        com.example.reminder.receiver.MidnightWidgetUpdateReceiver.scheduleMidnightUpdate(context);
     }
 
     @Override
     public void onDisabled(Context context) {
         android.util.Log.d("StickyWidget", "onDisabled");
         super.onDisabled(context);
+        // Cancel midnight updates when last widget is removed
+        com.example.reminder.receiver.MidnightWidgetUpdateReceiver.cancelMidnightUpdate(context);
     }
 
     @Override

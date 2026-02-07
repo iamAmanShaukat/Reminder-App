@@ -53,15 +53,116 @@ public class HomeFragment extends Fragment implements ReminderAdapter.OnItemClic
         });
 
         setupRecyclerView();
+        setupSpeedDialFab();
 
+        // Observe reminders
         viewModel.getAllReminders().observe(getViewLifecycleOwner(), reminders -> {
             adapter.submitList(reminders);
+            if (reminders.isEmpty()) {
+                binding.recyclerView.setVisibility(android.view.View.GONE);
+            } else {
+                binding.recyclerView.setVisibility(android.view.View.VISIBLE);
+            }
+        });
+    }
+
+    private void setupSpeedDialFab() {
+        final boolean[] isFabOpen = { false };
+
+        // Main FAB click - toggle speed dial
+        binding.fabAdd.setOnClickListener(v -> {
+            if (isFabOpen[0]) {
+                collapseFab();
+            } else {
+                expandFab();
+            }
+            isFabOpen[0] = !isFabOpen[0];
         });
 
-        binding.fabAdd.setOnClickListener(v -> {
-            NavController navController = Navigation.findNavController(view);
-            navController.navigate(R.id.action_homeFragment_to_addEditFragment);
+        // Scrim click - collapse speed dial
+        binding.fabScrim.setOnClickListener(v -> {
+            collapseFab();
+            isFabOpen[0] = false;
         });
+
+        // Templates mini FAB
+        binding.fabTemplates.setOnClickListener(v -> {
+            showTemplatesDialog();
+            collapseFab();
+            isFabOpen[0] = false;
+        });
+
+        // Custom reminder mini FAB
+        binding.fabCustom.setOnClickListener(v -> {
+            NavController navController = Navigation.findNavController(requireView());
+            navController.navigate(R.id.addEditFragment);
+            collapseFab();
+            isFabOpen[0] = false;
+        });
+    }
+
+    private void expandFab() {
+        // Show scrim
+        binding.fabScrim.setVisibility(android.view.View.VISIBLE);
+        binding.fabScrim.setAlpha(0f);
+        binding.fabScrim.animate().alpha(1f).setDuration(200).start();
+
+        // Rotate main FAB
+        binding.fabAdd.animate().rotation(45f).setDuration(200).start();
+
+        // Show and animate mini FABs
+        binding.fabTemplatesLayout.setVisibility(android.view.View.VISIBLE);
+        binding.fabTemplatesLayout.animate()
+                .alpha(1f)
+                .translationY(0f)
+                .setDuration(200)
+                .setStartDelay(50)
+                .start();
+
+        binding.fabCustomLayout.setVisibility(android.view.View.VISIBLE);
+        binding.fabCustomLayout.animate()
+                .alpha(1f)
+                .translationY(0f)
+                .setDuration(200)
+                .setStartDelay(100)
+                .start();
+    }
+
+    private void collapseFab() {
+        if (binding == null)
+            return;
+
+        // Hide scrim
+        binding.fabScrim.animate().alpha(0f).setDuration(200)
+                .withEndAction(() -> {
+                    if (binding != null)
+                        binding.fabScrim.setVisibility(android.view.View.GONE);
+                })
+                .start();
+
+        // Rotate main FAB back
+        binding.fabAdd.animate().rotation(0f).setDuration(200).start();
+
+        // Hide mini FABs
+        binding.fabTemplatesLayout.animate()
+                .alpha(0f)
+                .translationY(20f)
+                .setDuration(150)
+                .withEndAction(() -> {
+                    if (binding != null)
+                        binding.fabTemplatesLayout.setVisibility(android.view.View.GONE);
+                })
+                .start();
+
+        binding.fabCustomLayout.animate()
+                .alpha(0f)
+                .translationY(20f)
+                .setDuration(150)
+                .withEndAction(() -> {
+                    if (binding != null)
+                        binding.fabCustomLayout.setVisibility(android.view.View.GONE);
+                })
+                .start();
     }
 
     private void setupRecyclerView() {
@@ -81,9 +182,7 @@ public class HomeFragment extends Fragment implements ReminderAdapter.OnItemClic
 
     @Override
     public void onCheckBoxClick(Reminder reminder, boolean isChecked) {
-        if (isChecked) {
-            viewModel.markComplete(reminder);
-        }
+        viewModel.updateCompletionStatus(reminder, isChecked);
     }
 
     @Override
@@ -205,6 +304,11 @@ public class HomeFragment extends Fragment implements ReminderAdapter.OnItemClic
                     "Widget pinning requires Android 8.0+", com.google.android.material.snackbar.Snackbar.LENGTH_LONG)
                     .show();
         }
+    }
+
+    private void showTemplatesDialog() {
+        new com.example.reminder.ui.templates.TemplateDialogFragment()
+                .show(getParentFragmentManager(), "TEMPLATES");
     }
 
     @Override

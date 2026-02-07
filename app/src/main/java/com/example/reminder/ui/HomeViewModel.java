@@ -40,10 +40,15 @@ public class HomeViewModel extends ViewModel {
         com.example.reminder.widget.StickyNoteWidgetProvider.sendRefreshBroadcast(context);
     }
 
-    public void markComplete(Reminder reminder) {
-        android.util.Log.d("HomeViewModel", "Marking complete: " + reminder.getId());
-        reminder.setCompleted(true);
+    public void updateCompletionStatus(Reminder reminder, boolean isCompleted) {
+        android.util.Log.d("HomeViewModel", "Updating completion status: " + reminder.getId() + " to " + isCompleted);
+        reminder.setCompleted(isCompleted);
         repository.update(reminder);
         com.example.reminder.widget.StickyNoteWidgetProvider.sendRefreshBroadcast(context);
+    }
+
+    // Legacy method for backward compatibility
+    public void markComplete(Reminder reminder) {
+        updateCompletionStatus(reminder, true);
     }
 }

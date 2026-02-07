@@ -4,41 +4,34 @@
     android:id="@+id/widget_item_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="4dp">
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:padding="8dp">
 
+    <!-- Time/Date Badge - Compact -->
+    <TextView
+        android:id="@+id/widget_item_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/brand_accent"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:background="@drawable/bg_widget_time"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="4dp"
+        android:layout_marginEnd="10dp"
+        tools:text="10:00" />
 
-
-    <LinearLayout
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        
-        <TextView
-            android:id="@+id/widget_item_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/brand_accent"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            android:background="@drawable/bg_widget_time"
-            android:paddingHorizontal="8dp"
-            android:paddingVertical="4dp"
-            android:layout_marginEnd="12dp"
-            tools:text="10:00" />
-            
-        <TextView
-            android:id="@+id/widget_item_title"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textColor="@color/sticky_text"
-            android:textSize="14sp"
-            android:singleLine="true"
-            android:ellipsize="end"
-            tools:text="Buy Groceries" />
-
-    </LinearLayout>
+    <!-- Title - Takes remaining space -->
+    <TextView
+        android:id="@+id/widget_item_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textColor="@color/sticky_text"
+        android:textSize="14sp"
+        android:singleLine="true"
+        android:ellipsize="end"
+        tools:text="Buy Groceries" />
 
 </LinearLayout>

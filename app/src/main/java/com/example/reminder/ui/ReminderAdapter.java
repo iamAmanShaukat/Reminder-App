@@ -86,7 +86,8 @@ public class ReminderAdapter extends ListAdapter<Reminder, ReminderAdapter.Remin
 
         public ReminderViewHolder(@NonNull View itemView) {
             super(itemView);
-            cardView = (com.google.android.material.card.MaterialCardView) itemView;
+            // Root is now LinearLayout, find MaterialCardView inside
+            cardView = itemView.findViewById(R.id.cardView);
 
             containerHeader = itemView.findViewById(R.id.containerHeader);
             tvHeaderDate = itemView.findViewById(R.id.tvHeaderDate);
@@ -180,20 +181,37 @@ public class ReminderAdapter extends ListAdapter<Reminder, ReminderAdapter.Remin
             cbComplete.setOnCheckedChangeListener(null);
             cbComplete.setChecked(reminder.isCompleted());
 
-            // Green Border Logic
-            if (reminder.isCompleted()) {
-                cardView.setStrokeColor(itemView.getContext().getColor(R.color.color_check));
-                cardView.setStrokeWidth((int) (2 * itemView.getResources().getDisplayMetrics().density));
-            } else {
-                cardView.setStrokeWidth(0);
-            }
+            // Check if task is overdue (before today and not completed)
+            java.util.Calendar today = java.util.Calendar.getInstance();
+            today.set(java.util.Calendar.HOUR_OF_DAY, 0);
+            today.set(java.util.Calendar.MINUTE, 0);
+            today.set(java.util.Calendar.SECOND, 0);
+            today.set(java.util.Calendar.MILLISECOND, 0);
 
+            boolean isOverdue = reminder.getTimeMillis() < today.getTimeInMillis() && !reminder.isCompleted();
+
+            // Styling Priority: Selected > Completed > Overdue > Normal
             if (isSelected) {
+                // Selection mode - red border
                 cardView.setStrokeWidth((int) (3 * itemView.getResources().getDisplayMetrics().density));
                 cardView.setStrokeColor(itemView.getContext().getColor(R.color.color_delete));
                 cardView.setChecked(true);
-            } else {
+            } else if (reminder.isCompleted()) {
+                // Completed - green border
+                cardView.setStrokeColor(itemView.getContext().getColor(R.color.color_check));
+                cardView.setStrokeWidth((int) (2 * itemView.getResources().getDisplayMetrics().density));
                 cardView.setChecked(false);
+            } else {
+                // Normal or Overdue - no border
+                cardView.setStrokeWidth(0);
+                cardView.setChecked(false);
+            }
+
+            // Set time text color: red for overdue, default for normal
+            if (isOverdue) {
+                tvTime.setTextColor(itemView.getContext().getColor(R.color.color_delete));
+            } else {
+                tvTime.setTextColor(itemView.getContext().getColor(R.color.text_secondary));
             }
 
             if (isSelectionMode) {

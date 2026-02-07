@@ -21,6 +21,8 @@
          
          <!-- Dialog Theme -->
          <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>
+        <item name="android:datePickerDialogTheme">@style/ThemeOverlay.App.DatePicker</item>
+        <item name="android:timePickerDialogTheme">@style/ThemeOverlay.App.TimePicker</item>
     </style>
     
     <style name="Widget.Reminder.Button.3D" parent="Widget.Material3.Button">
@@ -88,4 +90,30 @@
         <item name="android:textColor">@color/text_secondary</item>
         <item name="android:textSize">16sp</item>
     </style>
+    <!-- Custom PopupMenu Style -->
+    <style name="Widget.App.PopupMenu" parent="Widget.Material3.PopupMenu">
+        <item name="android:popupBackground">@drawable/bg_popup_menu</item>
+        <item name="android:popupElevation">8dp</item>
+    </style>
+
+    <!-- Date Picker Theme -->
+    <style name="ThemeOverlay.App.DatePicker" parent="ThemeOverlay.Material3.MaterialCalendar">
+        <item name="colorPrimary">@color/brand_accent</item>
+        <item name="colorOnPrimary">@color/text_on_accent</item>
+        <item name="colorSurface">@color/background_surface</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorOnSurfaceVariant">@color/text_secondary</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.App.Dialog</item>
+    </style>
+
+    <!-- Time Picker Theme -->
+    <style name="ThemeOverlay.App.TimePicker" parent="ThemeOverlay.Material3.MaterialTimePicker">
+        <item name="colorPrimary">@color/brand_accent</item>
+        <item name="colorOnPrimary">@color/text_on_accent</item>
+        <item name="colorSurface">@color/background_surface</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorOnSurfaceVariant">@color/text_secondary</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.App.Dialog</item>
+    </style>
+
 </resources>
