@@ -1,6 +1,3 @@
 <resources>
     <string name="app_name">Reminder</string>
-    <string name="menu_home">Home</string>
-    <string name="title_add_reminder">Add Reminder</string>
-    <string name="title_edit_reminder">Edit Reminder</string>
 </resources>
