@@ -65,6 +65,61 @@ public class HomeFragment extends Fragment implements ReminderAdapter.OnItemClic
                 binding.recyclerView.setVisibility(android.view.View.VISIBLE);
             }
         });
+
+        checkFirstRun();
+    }
+
+    private void checkFirstRun() {
+        android.content.SharedPreferences prefs = requireContext().getSharedPreferences("com.example.reminder",
+                android.content.Context.MODE_PRIVATE);
+        boolean isFirstRun = prefs.getBoolean("isFirstRun", true);
+
+        if (isFirstRun) {
+            // Show custom onboarding card with animation
+            android.view.View card = binding.getRoot().findViewById(R.id.cardOnboarding);
+            android.view.View scrim = binding.getRoot().findViewById(R.id.onboardingScrim);
+
+            if (card != null && scrim != null) {
+                card.setTranslationY(100f);
+                card.setVisibility(android.view.View.VISIBLE);
+                scrim.setVisibility(android.view.View.VISIBLE);
+
+                card.animate()
+                        .alpha(1f)
+                        .translationY(0f)
+                        .setDuration(500)
+                        .setStartDelay(500) // Wait for app load
+                        .start();
+
+                // Define dismiss action
+                Runnable dismissAction = () -> {
+                    card.animate()
+                            .alpha(0f)
+                            .translationY(100f)
+                            .setDuration(300)
+                            .withEndAction(() -> {
+                                card.setVisibility(android.view.View.GONE);
+                                scrim.setVisibility(android.view.View.GONE);
+                            })
+                            .start();
+                    prefs.edit().putBoolean("isFirstRun", false).apply();
+                };
+
+                // Setup Click Listeners
+                card.findViewById(R.id.btnViewHelp).setOnClickListener(v -> {
+                    Navigation.findNavController(requireView()).navigate(R.id.action_homeFragment_to_helpFragment);
+                    // Dismiss card after navigating
+                    prefs.edit().putBoolean("isFirstRun", false).apply();
+                    card.setVisibility(android.view.View.GONE);
+                    scrim.setVisibility(android.view.View.GONE);
+                });
+
+                card.findViewById(R.id.btnDismissOnboarding).setOnClickListener(v -> dismissAction.run());
+
+                // Dismiss when touching outside
+                scrim.setOnClickListener(v -> dismissAction.run());
+            }
+        }
     }
 
     private void setupSpeedDialFab() {
@@ -295,8 +350,7 @@ public class HomeFragment extends Fragment implements ReminderAdapter.OnItemClic
                 titleView.setText("Delete " + count + (count == 1 ? " Reminder?" : " Reminders?"));
 
                 android.app.AlertDialog dialog = new android.app.AlertDialog.Builder(requireContext())
-                        .setView(dialogView)
-                        .create();
+                        .setView(dialogView).create();
 
                 if (dialog.getWindow() != null) {
                     dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
