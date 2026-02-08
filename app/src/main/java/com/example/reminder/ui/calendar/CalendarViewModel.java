@@ -136,6 +136,10 @@ public class CalendarViewModel extends ViewModel {
             return;
 
         for (Reminder r : allReminders) {
+            // Filter out Daily Routine / Quick Template tasks (hidden)
+            if (r.isHideFromWidget())
+                continue;
+
             LocalDate date = java.time.Instant.ofEpochMilli(r.getTimeMillis())
                     .atZone(ZoneId.systemDefault())
                     .toLocalDate();
@@ -158,6 +162,9 @@ public class CalendarViewModel extends ViewModel {
 
         Map<LocalDate, List<Reminder>> newMap = new HashMap<>();
         for (Reminder r : allReminders) {
+            if (r.isHideFromWidget())
+                continue;
+
             LocalDate date = java.time.Instant.ofEpochMilli(r.getTimeMillis())
                     .atZone(ZoneId.systemDefault())
                     .toLocalDate();

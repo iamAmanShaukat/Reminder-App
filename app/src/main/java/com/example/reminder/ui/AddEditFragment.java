@@ -58,6 +58,23 @@ public class AddEditFragment extends Fragment {
         binding.containerRepeat.setOnClickListener(v -> showRepeatOptions());
 
         binding.btnSave.setOnClickListener(v -> saveReminder());
+
+        // Daily Routine Toggle Logic
+        binding.switchAllDay.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                // DAILY MODE
+                selectedRepeatMode = "DAILY";
+                binding.btnDateContainer.setEnabled(false);
+                binding.btnDateContainer.setAlpha(0.5f);
+                updateRepeatText();
+            } else {
+                // NORMAL MODE
+                selectedRepeatMode = "NONE";
+                binding.btnDateContainer.setEnabled(true);
+                binding.btnDateContainer.setAlpha(1.0f);
+                updateRepeatText();
+            }
+        });
     }
 
     // Advanced Repeat State
@@ -91,6 +108,21 @@ public class AddEditFragment extends Fragment {
         android.widget.TextView tvEnd = dialogView.findViewById(com.example.reminder.R.id.tvEndTime);
         android.widget.Button btnCancel = dialogView.findViewById(com.example.reminder.R.id.btnCancel);
         android.widget.Button btnConfirm = dialogView.findViewById(com.example.reminder.R.id.btnConfirm);
+
+        // Hide Days if Daily Routine
+        boolean isDailyRoutine = binding.switchAllDay.isChecked();
+        if (isDailyRoutine) {
+            chipGroup.setVisibility(View.GONE);
+            // Hide the label above it too (it doesn't have an ID, so we might need to find
+            // it by index or just leave it?)
+            // The label is the 1st child of the main layout, index 1. 2nd child is "Repeat
+            // On" label.
+            // Let's bind IDs to the labels to be safe, or just assume the user accepts the
+            // label being there?
+            // "Repeat On" label is at index 1.
+            android.widget.LinearLayout root = (android.widget.LinearLayout) chipGroup.getParent();
+            root.getChildAt(1).setVisibility(View.GONE); // "Repeat On" label
+        }
 
         // Load Current State
         // Days
@@ -167,32 +199,36 @@ public class AddEditFragment extends Fragment {
 
         btnConfirm.setOnClickListener(v -> {
             // Save State
-            StringBuilder sb = new StringBuilder();
-            boolean first = true;
-            // Iterate chips (0=Mon(2)...6=Sun(1))
-            int[] calendarDays = {
-                    java.util.Calendar.MONDAY, java.util.Calendar.TUESDAY, java.util.Calendar.WEDNESDAY,
-                    java.util.Calendar.THURSDAY, java.util.Calendar.FRIDAY, java.util.Calendar.SATURDAY,
-                    java.util.Calendar.SUNDAY
-            };
+            if (isDailyRoutine) {
+                repeatDays = "1,2,3,4,5,6,7"; // Force all days
+            } else {
+                StringBuilder sb = new StringBuilder();
+                boolean first = true;
+                // Iterate chips (0=Mon(2)...6=Sun(1))
+                int[] calendarDays = {
+                        java.util.Calendar.MONDAY, java.util.Calendar.TUESDAY, java.util.Calendar.WEDNESDAY,
+                        java.util.Calendar.THURSDAY, java.util.Calendar.FRIDAY, java.util.Calendar.SATURDAY,
+                        java.util.Calendar.SUNDAY
+                };
 
-            int checkedCount = 0;
-            for (int i = 0; i < 7; i++) {
-                com.google.android.material.chip.Chip chip = (com.google.android.material.chip.Chip) chipGroup
-                        .getChildAt(i);
-                if (chip.isChecked()) {
-                    if (!first)
-                        sb.append(",");
-                    sb.append(calendarDays[i]);
-                    first = false;
-                    checkedCount++;
+                int checkedCount = 0;
+                for (int i = 0; i < 7; i++) {
+                    com.google.android.material.chip.Chip chip = (com.google.android.material.chip.Chip) chipGroup
+                            .getChildAt(i);
+                    if (chip.isChecked()) {
+                        if (!first)
+                            sb.append(",");
+                        sb.append(calendarDays[i]);
+                        first = false;
+                        checkedCount++;
+                    }
                 }
-            }
-            repeatDays = sb.toString();
+                repeatDays = sb.toString();
 
-            if (checkedCount == 0) {
-                Toast.makeText(requireContext(), "Please select at least one day", Toast.LENGTH_SHORT).show();
-                return;
+                if (checkedCount == 0) {
+                    Toast.makeText(requireContext(), "Please select at least one day", Toast.LENGTH_SHORT).show();
+                    return;
+                }
             }
 
             if (radioGroup.getCheckedRadioButtonId() == com.example.reminder.R.id.radioInterval) {
@@ -277,7 +313,20 @@ public class AddEditFragment extends Fragment {
         binding.etTitle.setText(reminder.getTitle());
         binding.etDescription.setText(reminder.getDescription());
         calendar.setTimeInMillis(reminder.getTimeMillis());
-        binding.switchAllDay.setChecked(reminder.isAllDay());
+
+        // Restore Switch State based on Repeat Mode (Daily) & Hidden from Widget
+        boolean isDailyRoutine = ("DAILY".equals(reminder.getRepeatMode()) || "CUSTOM".equals(reminder.getRepeatMode()))
+                && reminder.isHideFromWidget();
+        binding.switchAllDay.setChecked(isDailyRoutine);
+
+        if (isDailyRoutine) {
+            binding.btnDateContainer.setEnabled(false);
+            binding.btnDateContainer.setAlpha(0.5f);
+        } else {
+            binding.btnDateContainer.setEnabled(true);
+            binding.btnDateContainer.setAlpha(1.0f);
+        }
+
         selectedRepeatMode = reminder.getRepeatMode();
         if (selectedRepeatMode == null)
             selectedRepeatMode = "NONE";
@@ -375,15 +424,31 @@ public class AddEditFragment extends Fragment {
             reminder.setRepeatDays(repeatDays);
             reminder.setWindowStart(windowStartC);
             reminder.setWindowEnd(windowEndC);
+
+            // Daily Routine Specifics
+            if (binding.switchAllDay.isChecked()) {
+                reminder.setHideFromWidget(true); // Hidden from widget
+                reminder.setAllDay(false); // Valid time is used
+            } else {
+                reminder.setHideFromWidget(false); // Show on widget
+                reminder.setAllDay(false); // Default logic
+            }
         } else {
             reminder = new Reminder(title, description, calendar.getTimeInMillis(),
-                    binding.switchAllDay.isChecked(), selectedRepeatMode, customIntervalMillis, 0);
+                    false, selectedRepeatMode, customIntervalMillis, 0); // isAllDay false by default
+
+            // Daily Routine Specifics
+            if (binding.switchAllDay.isChecked()) {
+                reminder.setHideFromWidget(true);
+                reminder.setAllDay(false);
+            } else {
+                reminder.setHideFromWidget(false);
+            }
+
             // Advanced setters
             reminder.setRepeatDays(repeatDays);
             reminder.setWindowStart(windowStartC);
             reminder.setWindowEnd(windowEndC);
-            // Default custom reminders to show on widget
-            reminder.setHideFromWidget(false);
         }
 
         viewModel.saveReminder(reminder);

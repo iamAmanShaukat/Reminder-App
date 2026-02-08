@@ -105,8 +105,14 @@ public class TemplateDialogFragment extends BottomSheetDialogFragment
         adapter.setTemplates(templates);
     }
 
+    private boolean isApplyingTemplate = false;
+
     @Override
     public void onTemplateClick(ReminderTemplate template) {
+        if (isApplyingTemplate)
+            return;
+        isApplyingTemplate = true;
+
         // Create reminders from template
         createRemindersFromTemplate(template);
         dismiss();
@@ -138,9 +144,13 @@ public class TemplateDialogFragment extends BottomSheetDialogFragment
 
             if ("CUSTOM".equals(template.getRepeatMode())) {
                 reminder.setRepeatInterval(template.getRepeatInterval());
-                reminder.setRepeatDays(template.getRepeatDays());
+                reminder.setRepeatDays("1,2,3,4,5,6,7"); // Force all days
                 reminder.setWindowStart(template.getWindowStart());
                 reminder.setWindowEnd(template.getWindowEnd());
+            } else {
+                // For DAILY, ensure we repeat every day
+                reminder.setRepeatMode("DAILY");
+                reminder.setRepeatDays("1,2,3,4,5,6,7");
             }
 
             // Hide from widget per user request

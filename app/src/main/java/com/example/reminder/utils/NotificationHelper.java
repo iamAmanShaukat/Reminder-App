@@ -19,7 +19,7 @@ import androidx.preference.PreferenceManager;
 
 public class NotificationHelper {
 
-        public static final String CHANNEL_ID = "reminder_channel_v2"; // Changed ID to force update
+        public static final String CHANNEL_ID = "reminder_channel_v3"; // Changed ID to force update
         public static final String ACTION_SNOOZE = "com.example.reminder.ACTION_SNOOZE";
         public static final String ACTION_COMPLETE = "com.example.reminder.ACTION_COMPLETE";
         public static final String EXTRA_REMINDER_ID = "reminder_id";
@@ -99,8 +99,8 @@ public class NotificationHelper {
                                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                                 .setContentIntent(pendingOpenIntent)
-                                .setAutoCancel(!reminder.isAllDay()) // Sticky if all-day
-                                .setOngoing(reminder.isAllDay()) // Non-removable if all-day
+                                .setAutoCancel(false) // Sticky: Click doesn't dismiss (must use action)
+                                .setOngoing(true) // Sticky: Swipe doesn't dismiss
                                 .setDefaults(NotificationCompat.DEFAULT_ALL) // Sound + Vibration
                                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
                                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
