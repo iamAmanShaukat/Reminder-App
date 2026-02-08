@@ -275,17 +275,18 @@ public class ReminderAdapter extends ListAdapter<ListItem, RecyclerView.ViewHold
 
                 // Determine active days
                 java.util.Set<Integer> activeDays = new java.util.HashSet<>();
-                if ("DAILY".equals(mode)) {
-                    // All days
-                    for (int i = 1; i <= 7; i++)
-                        activeDays.add(i);
-                } else if (daysStr != null && !daysStr.isEmpty()) {
+
+                if (daysStr != null && !daysStr.isEmpty()) {
                     for (String d : daysStr.split(",")) {
                         try {
                             activeDays.add(Integer.parseInt(d.trim()));
                         } catch (NumberFormatException ignored) {
                         }
                     }
+                } else if ("DAILY".equals(mode)) {
+                    // All days
+                    for (int i = 1; i <= 7; i++)
+                        activeDays.add(i);
                 } else if ("WEEKLY".equals(mode)) {
                     // Fallback to day of week of start time
                     java.util.Calendar c = java.util.Calendar.getInstance();
