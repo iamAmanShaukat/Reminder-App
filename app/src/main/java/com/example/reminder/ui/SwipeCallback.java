@@ -44,6 +44,14 @@ public abstract class SwipeCallback extends ItemTouchHelper.SimpleCallback {
     }
 
     @Override
+    public void clearView(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+        super.clearView(recyclerView, viewHolder);
+        // Ensure background is cleared when interaction ends
+        background.setBounds(0, 0, 0, 0);
+        viewHolder.itemView.invalidate();
+    }
+
+    @Override
     public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView,
             @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState,
             boolean isCurrentlyActive) {

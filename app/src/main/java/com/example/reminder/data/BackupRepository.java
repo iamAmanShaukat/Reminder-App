@@ -89,7 +89,7 @@ public class BackupRepository {
                 credential.setSelectedAccount(account.getAccount());
 
                 com.google.api.services.drive.Drive googleDriveService = new com.google.api.services.drive.Drive.Builder(
-                        com.google.api.client.extensions.android.http.AndroidHttp.newCompatibleTransport(),
+                        new com.google.api.client.http.javanet.NetHttpTransport(),
                         new com.google.api.client.json.gson.GsonFactory(),
                         credential)
                         .setApplicationName("Reminder App")
@@ -147,7 +147,7 @@ public class BackupRepository {
                 credential.setSelectedAccount(account.getAccount());
 
                 com.google.api.services.drive.Drive googleDriveService = new com.google.api.services.drive.Drive.Builder(
-                        com.google.api.client.extensions.android.http.AndroidHttp.newCompatibleTransport(),
+                        new com.google.api.client.http.javanet.NetHttpTransport(),
                         new com.google.api.client.json.gson.GsonFactory(),
                         credential)
                         .setApplicationName("Reminder App")

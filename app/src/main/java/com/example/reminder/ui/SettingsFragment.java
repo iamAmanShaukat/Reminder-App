@@ -35,7 +35,8 @@ public class SettingsFragment extends Fragment {
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                    Uri uri = result.getData().getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+                    Uri uri = com.example.reminder.utils.CompatUtils.getParcelableExtra(result.getData(),
+                            RingtoneManager.EXTRA_RINGTONE_PICKED_URI, Uri.class);
                     if (uri != null) {
                         saveRingtone(uri);
                     } else {

@@ -145,4 +145,16 @@ public class Reminder implements Serializable {
     public void setWindowEnd(Integer windowEnd) {
         this.windowEnd = windowEnd;
     }
+
+    public Reminder copy() {
+        Reminder newReminder = new Reminder(title, description, timeMillis, isAllDay, repeatMode, repeatInterval,
+                color);
+        newReminder.setId(id);
+        newReminder.setCompleted(isCompleted);
+        newReminder.setHideFromWidget(hideFromWidget);
+        newReminder.setRepeatDays(repeatDays);
+        newReminder.setWindowStart(windowStart);
+        newReminder.setWindowEnd(windowEnd);
+        return newReminder;
+    }
 }
