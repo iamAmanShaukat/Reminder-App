@@ -444,7 +444,21 @@ public class AddEditFragment extends Fragment {
         if (binding.switchAllDay.isChecked()) {
             hide = true; // Daily Routine is always hidden/everyday
         } else if ("DAILY".equals(selectedRepeatMode)) {
-            hide = true; // Daily is 7 days >= 5
+            int count = 7; // Default to 7 if logic fails
+            if (repeatDays != null && !repeatDays.trim().isEmpty()) {
+                String[] split = repeatDays.split(",");
+                int validCount = 0;
+                for (String s : split) {
+                    if (s != null && !s.trim().isEmpty()) {
+                        validCount++;
+                    }
+                }
+                count = validCount;
+            } else {
+                // specific days not set, but mode is DAILY -> assume all days
+                count = 7;
+            }
+            hide = (count >= 5);
         } else if ("WEEKLY".equals(selectedRepeatMode)) {
             hide = false; // 1 day < 5
         } else if ("MONTHLY".equals(selectedRepeatMode)) {
