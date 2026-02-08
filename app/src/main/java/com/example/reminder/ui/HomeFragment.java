@@ -28,7 +28,8 @@ public class HomeFragment extends Fragment implements ReminderAdapter.OnItemClic
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
             @Nullable Bundle savedInstanceState) {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
-        setHasOptionsMenu(true); // Enable Menu
+        // setHasOptionsMenu(true); // Removed: Toolbar handles menu directly via
+        // app:menu and listener
         return binding.getRoot();
     }
 
@@ -57,9 +58,11 @@ public class HomeFragment extends Fragment implements ReminderAdapter.OnItemClic
         setupSpeedDialFab();
 
         // Observe reminders
-        viewModel.getAllReminders().observe(getViewLifecycleOwner(), reminders -> {
-            adapter.submitList(reminders);
-            if (reminders.isEmpty()) {
+        viewModel.getReminderListItems().observe(getViewLifecycleOwner(), items -> {
+            adapter.submitList(items);
+            // Check if empty (ignoring headers? logic might need nuance, but for now simple
+            // empty check is fine)
+            if (items.isEmpty()) {
                 binding.recyclerView.setVisibility(android.view.View.GONE);
             } else {
                 binding.recyclerView.setVisibility(android.view.View.VISIBLE);
@@ -229,10 +232,25 @@ public class HomeFragment extends Fragment implements ReminderAdapter.OnItemClic
         androidx.recyclerview.widget.ItemTouchHelper itemTouchHelper = new androidx.recyclerview.widget.ItemTouchHelper(
                 new SwipeCallback(requireContext()) {
                     @Override
+                    public int getMovementFlags(@NonNull androidx.recyclerview.widget.RecyclerView recyclerView,
+                            @NonNull androidx.recyclerview.widget.RecyclerView.ViewHolder viewHolder) {
+                        // Disable swipe for headers
+                        int position = viewHolder.getAdapterPosition();
+                        if (adapter.getItemViewType(position) == ListItem.TYPE_HEADER) {
+                            return makeMovementFlags(0, 0);
+                        }
+                        return super.getMovementFlags(recyclerView, viewHolder);
+                    }
+
+                    @Override
                     public void onSwiped(@NonNull androidx.recyclerview.widget.RecyclerView.ViewHolder viewHolder,
                             int direction) {
                         int position = viewHolder.getAdapterPosition();
-                        Reminder reminder = adapter.getCurrentList().get(position);
+                        ListItem item = adapter.getCurrentList().get(position);
+
+                        if (!(item instanceof ReminderItem))
+                            return; // Should be handled by flags, but safety first
+                        Reminder reminder = ((ReminderItem) item).getReminder();
 
                         if (direction == androidx.recyclerview.widget.ItemTouchHelper.LEFT) {
                             // Delete
@@ -241,31 +259,23 @@ public class HomeFragment extends Fragment implements ReminderAdapter.OnItemClic
                                     .make(binding.getRoot(), "Reminder deleted",
                                             com.google.android.material.snackbar.Snackbar.LENGTH_LONG)
                                     .setAction("Undo", v -> viewModel.insert(reminder))
-                                    // can restore or we
-                                    // accept simple delete
-                                    // for now.
-                                    // Actually HomeViewModel doesn't expose save, it exposes delete.
-                                    // Let's just use delete for now, implementing undo properly requires insert in
-                                    // VM.
-                                    // Ideally we should ask for confirmation or allow undo.
                                     .show();
 
                         } else if (direction == androidx.recyclerview.widget.ItemTouchHelper.RIGHT) {
                             // Complete
                             viewModel.updateCompletionStatus(reminder, !reminder.isCompleted());
-                            // Refresh to show update (or relies on LiveData)
-                            // If we toggle, and it's already completed, it becomes incomplete. Logic is
-                            // fine.
-                            // But typically swipe right is "Mark Complete".
                             if (!reminder.isCompleted()) {
-                                // Only show snackbar if we actually completed it (positive action)
                                 com.google.android.material.snackbar.Snackbar
                                         .make(binding.getRoot(), "Reminder completed",
                                                 com.google.android.material.snackbar.Snackbar.LENGTH_SHORT)
                                         .show();
                             }
-                            // Reset the swipe state so the item snaps back
-                            adapter.notifyItemChanged(position);
+                            // Do NOT call notifyItemChanged(position) here.
+                            // The database update will trigger a LiveData emission, which will update the
+                            // list
+                            // via submitList -> DiffUtil.
+                            // Leaving it alone lets ItemTouchHelper snap it back visually, providing good
+                            // feedback.
                         }
                     }
                 });

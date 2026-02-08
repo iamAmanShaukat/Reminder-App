@@ -31,6 +31,10 @@ public class ReminderRepository {
         return reminderDao.getReminderByIdSync(id);
     }
 
+    public List<Reminder> getAllRemindersSync() {
+        return reminderDao.getAllRemindersSync();
+    }
+
     public void insert(Reminder reminder) {
         executorService.execute(() -> {
             try {

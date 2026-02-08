@@ -109,7 +109,12 @@ public class CalendarFragment extends Fragment {
         });
 
         viewModel.getSelectedDateReminders().observe(getViewLifecycleOwner(), reminders -> {
-            detailAdapter.submitList(reminders);
+            // Convert to List<ListItem> for the shared Adapter
+            java.util.List<com.example.reminder.ui.ListItem> items = new java.util.ArrayList<>();
+            for (com.example.reminder.data.Reminder r : reminders) {
+                items.add(new com.example.reminder.ui.ReminderItem(r));
+            }
+            detailAdapter.submitList(items);
             binding.tvSelectedDate.append(" (" + reminders.size() + ")");
         });
 

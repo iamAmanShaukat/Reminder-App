@@ -44,7 +44,8 @@ public class AddEditFragment extends Fragment {
         calendar = Calendar.getInstance();
 
         if (getArguments() != null && getArguments().containsKey("reminder")) {
-            existingReminder = (Reminder) getArguments().getSerializable("reminder");
+            existingReminder = com.example.reminder.utils.CompatUtils.getSerializable(getArguments(), "reminder",
+                    Reminder.class);
             populateFields(existingReminder);
         }
 
@@ -424,32 +425,42 @@ public class AddEditFragment extends Fragment {
             reminder.setRepeatDays(repeatDays);
             reminder.setWindowStart(windowStartC);
             reminder.setWindowEnd(windowEndC);
-
-            // Daily Routine Specifics
-            if (binding.switchAllDay.isChecked()) {
-                reminder.setHideFromWidget(true); // Hidden from widget
-                reminder.setAllDay(false); // Valid time is used
-            } else {
-                reminder.setHideFromWidget(false); // Show on widget
-                reminder.setAllDay(false); // Default logic
-            }
         } else {
             reminder = new Reminder(title, description, calendar.getTimeInMillis(),
-                    false, selectedRepeatMode, customIntervalMillis, 0); // isAllDay false by default
-
-            // Daily Routine Specifics
-            if (binding.switchAllDay.isChecked()) {
-                reminder.setHideFromWidget(true);
-                reminder.setAllDay(false);
-            } else {
-                reminder.setHideFromWidget(false);
-            }
+                    false, selectedRepeatMode, customIntervalMillis, 0);
 
             // Advanced setters
             reminder.setRepeatDays(repeatDays);
             reminder.setWindowStart(windowStartC);
             reminder.setWindowEnd(windowEndC);
         }
+
+        // Visibility Logic:
+        // - "Everyday" tasks (Hidden/Grouped) are those that repeat >= 5 days a week OR
+        // are marked as Routine.
+        // - "Normal" repeating tasks (< 5 days) stay visible in calendar/widget.
+
+        boolean hide = false;
+        if (binding.switchAllDay.isChecked()) {
+            hide = true; // Daily Routine is always hidden/everyday
+        } else if ("DAILY".equals(selectedRepeatMode)) {
+            hide = true; // Daily is 7 days >= 5
+        } else if ("WEEKLY".equals(selectedRepeatMode)) {
+            hide = false; // 1 day < 5
+        } else if ("MONTHLY".equals(selectedRepeatMode)) {
+            hide = false; // 1 day < 5
+        } else if ("CUSTOM".equals(selectedRepeatMode)) {
+            int count = 7; // Default to all days if not specified
+            if (repeatDays != null && !repeatDays.isEmpty()) {
+                count = repeatDays.split(",").length;
+            }
+            hide = (count >= 5);
+        }
+
+        reminder.setHideFromWidget(hide);
+
+        // Ensure isAllDay matches switch (legacy mostly, but keeps UI sync)
+        reminder.setAllDay(false); // We use specific times now mostly
 
         viewModel.saveReminder(reminder);
 
