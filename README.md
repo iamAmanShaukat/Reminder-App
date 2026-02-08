@@ -105,22 +105,33 @@ app/src/main/
 │   │   ├── Reminder.java      # Entity
 │   │   ├── ReminderDao.java
 │   │   └── BackupRepository.java # Google Drive Logic
-│   ├── di/                    # Dependency Injection
+│   ├── di/                    # Dependency Injection (Hilt Modules)
 │   │   └── AppModule.java
+│   ├── domain/                # Use Cases & Clean Architecture
+│   │   └── usecase/
 │   ├── receiver/              # Broadcast Receivers
 │   │   ├── AlarmReceiver.java
 │   │   └── BootReceiver.java
+│   ├── service/               # Background Services
+│   │   ├── AlarmScheduler.java
+│   │   └── WidgetRefreshService.java
+│   ├── templates/             # Pre-defined Task Templates
+│   │   ├── ReminderTemplate.java
+│   │   └── Templateadapter.java
 │   ├── ui/                    # Fragments & ViewModels
 │   │   ├── HomeFragment.java
 │   │   ├── AddEditFragment.java
 │   │   ├── SettingsFragment.java
-│   │   ├── HelpFragment.java  # documentation screen
+│   │   ├── HelpFragment.java  # Documentation screen
 │   │   └── SwipeCallback.java # Gesture logic
-│   ├── utils/                 # Helpers
-│   │   └── NotificationHelper.java
+│   ├── utils/                 # Helpers & Extensions
+│   │   ├── NotificationHelper.java
+│   │   └── DateFormatter.java
 │   ├── widget/                # Widget Implementation
 │   │   ├── StickyNoteWidgetProvider.java
 │   │   └── WidgetRemoteViewsService.java
+│   ├── worker/                # WorkManager Tasks
+│   │   └── BackupWorker.java
 │   └── ReminderApp.java       # Application Class
 ├── res/
 │   ├── drawable/              # Custom backgrounds & icons
