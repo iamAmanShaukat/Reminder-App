@@ -406,80 +406,68 @@ public class AddEditFragment extends Fragment {
             return;
         }
 
-        // Allow saving past times if it's a repeating reminder (it will confirm next
-        // occurrence)
-        if (calendar.getTimeInMillis() <= System.currentTimeMillis() && "NONE".equals(selectedRepeatMode)) {
-            // Optional: warn user
-        }
-
-        Reminder reminder;
-        if (existingReminder != null) {
-            reminder = existingReminder;
-            reminder.setTitle(title);
-            reminder.setDescription(description);
-            reminder.setTimeMillis(calendar.getTimeInMillis());
-            reminder.setAllDay(binding.switchAllDay.isChecked());
-            reminder.setRepeatMode(selectedRepeatMode);
-            reminder.setRepeatInterval(customIntervalMillis);
-            // Advanced
-            reminder.setRepeatDays(repeatDays);
-            reminder.setWindowStart(windowStartC);
-            reminder.setWindowEnd(windowEndC);
-        } else {
-            reminder = new Reminder(title, description, calendar.getTimeInMillis(),
-                    false, selectedRepeatMode, customIntervalMillis, 0);
-
-            // Advanced setters
-            reminder.setRepeatDays(repeatDays);
-            reminder.setWindowStart(windowStartC);
-            reminder.setWindowEnd(windowEndC);
-        }
-
-        // Visibility Logic:
-        // - "Everyday" tasks (Hidden/Grouped) are those that repeat >= 5 days a week OR
-        // are marked as Routine.
-        // - "Normal" repeating tasks (< 5 days) stay visible in calendar/widget.
-
-        boolean hide = false;
-        if (binding.switchAllDay.isChecked()) {
-            hide = true; // Daily Routine is always hidden/everyday
-        } else if ("DAILY".equals(selectedRepeatMode)) {
-            int count = 7; // Default to 7 if logic fails
-            if (repeatDays != null && !repeatDays.trim().isEmpty()) {
-                String[] split = repeatDays.split(",");
-                int validCount = 0;
-                for (String s : split) {
-                    if (s != null && !s.trim().isEmpty()) {
-                        validCount++;
-                    }
-                }
-                count = validCount;
-            } else {
-                // specific days not set, but mode is DAILY -> assume all days
-                count = 7;
-            }
-            hide = (count >= 5);
-        } else if ("WEEKLY".equals(selectedRepeatMode)) {
-            hide = false; // 1 day < 5
-        } else if ("MONTHLY".equals(selectedRepeatMode)) {
-            hide = false; // 1 day < 5
-        } else if ("CUSTOM".equals(selectedRepeatMode)) {
-            int count = 7; // Default to all days if not specified
-            if (repeatDays != null && !repeatDays.isEmpty()) {
-                count = repeatDays.split(",").length;
-            }
-            hide = (count >= 5);
-        }
-
-        reminder.setHideFromWidget(hide);
-
-        // Ensure isAllDay matches switch (legacy mostly, but keeps UI sync)
-        reminder.setAllDay(false); // We use specific times now mostly
+        Reminder reminder = createUpdatedReminder(title, description);
+        reminder.setHideFromWidget(shouldHideFromWidget(reminder));
 
         viewModel.saveReminder(reminder);
-
-        // Check for widgets and prompt
         checkAndPromptForWidget();
+    }
+
+    private Reminder createUpdatedReminder(String title, String description) {
+        // Reuse existing reminder OR create a new one
+        Reminder reminder = (existingReminder != null) ? existingReminder : new Reminder();
+
+        // Common updates for both cases
+        reminder.setTitle(title);
+        reminder.setDescription(description);
+
+        reminder.setTimeMillis(calendar.getTimeInMillis());
+        reminder.setAllDay(false); // Legacy field, kept false as we use specific times
+        reminder.setRepeatMode(selectedRepeatMode);
+        reminder.setRepeatInterval(customIntervalMillis);
+
+        // Advanced
+        reminder.setRepeatDays(repeatDays);
+        reminder.setWindowStart(windowStartC);
+        reminder.setWindowEnd(windowEndC);
+
+        return reminder;
+    }
+
+    private boolean shouldHideFromWidget(Reminder reminder) {
+        // Daily Routine (Switch checked) is always hidden
+        if (binding.switchAllDay.isChecked()) {
+            return true;
+        }
+
+        // Logic: If a task repeats 5 or more days a week, it is considered
+        // "Frequent/Routine"
+        // and is hidden from the main list to avoid clutter.
+        int daysCount = calculateDailyFrequency(reminder);
+        return daysCount >= 5;
+    }
+
+    /**
+     * Calculates how many days a week this reminder repeats.
+     */
+    private int calculateDailyFrequency(Reminder reminder) {
+        if (reminder.getRepeatDays() != null && !reminder.getRepeatDays().isEmpty()) {
+            String[] split = reminder.getRepeatDays().split(",");
+            int count = 0;
+            for (String s : split) {
+                if (s != null && !s.trim().isEmpty()) {
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        // If no specific days are set but mode implies repetition, assume 7 days
+        if ("DAILY".equals(reminder.getRepeatMode()) || "CUSTOM".equals(reminder.getRepeatMode())) {
+            return 7;
+        }
+
+        return 0;
     }
 
     private void checkAndPromptForWidget() {
